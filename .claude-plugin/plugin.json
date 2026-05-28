@@ -1,7 +1,7 @@
 {
   "name": "galledia-office-ci",
-  "version": "0.2.0",
-  "description": "CI/CD-konforme Office-Dokumente fuer Galledia gemaess Markenhandbuch v1.5. Drei Skills: Brief, Kurzbrief und Praesentation. Liefert fertige .docx- und .pptx-Dateien mit korrekten Logos, Volte-Schrift, Schreibweisen und Adresszeilen.",
+  "version": "0.3.0",
+  "description": "CI/CD-konforme Office-Dokumente fuer Galledia gemaess Markenhandbuch v1.5. Drei Skills (Brief, Kurzbrief, Praesentation) + MCP-Server galledia-office-mcp fuer die Dokumentengenerierung. Funktioniert in Cowork Web + Desktop sowie Claude Code — unabhaengig von der claude.ai-Sandbox.",
   "author": {
     "name": "Galledia Fachmedien AG",
     "email": "fachmedien@galledia.ch"
@@ -11,5 +11,6 @@
     "skills/galledia-brief",
     "skills/galledia-kurzbrief",
     "skills/galledia-praesentation"
-  ]
+  ],
+  "mcpServers": ".mcp.json"
 }

@@ -84,17 +84,25 @@ Ueberschreiben via:
 
 ## Aufruf
 
+**Primaerer Weg: MCP-Tool `mcp__galledia-office__generate_galledia_kurzbrief`**
+
 ```python
-import json, subprocess, sys
-from pathlib import Path
+result = mcp__galledia_office__generate_galledia_kurzbrief(data={
+    "sender_oe": "Galledia Fachmedien AG",
+    ...,
+    "notes": {"Note10": "Beilagen: ..."}  # optional
+})
+```
 
-data = { ... }  # siehe Schema
+Returns: `{filename, mimetype, content_base64, size_bytes, report, validation_errors}`.
 
-result = subprocess.run(
-    [sys.executable, str(skill_dir / "scripts" / "fill_kurzbrief.py"),
-     "--input", "-", "--output", "/tmp/kurzbrief.docx"],
-    input=json.dumps(data), text=True, capture_output=True, encoding="utf-8"
-)
+Bei Erfolg: Datei dem User als Download anbieten.
+Bei Validation-Fehler: User informieren und korrigieren.
+
+**Fallback** (Claude Code Desktop, ohne MCP):
+
+```powershell
+python "<skill-dir>/scripts/fill_kurzbrief.py" --input <data.json> --output <out.docx>
 ```
 
 ## CI-Regeln

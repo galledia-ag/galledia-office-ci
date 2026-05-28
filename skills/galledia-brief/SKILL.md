@@ -53,46 +53,39 @@ Baue ein JSON-Objekt mit allen Daten zusammen (siehe Schema unten) und
 rufe `fill_brief.py` via Python aus. Das Skript validiert nochmal,
 befuellt die Vorlage und schreibt die `.docx`-Datei.
 
-**Aufruf** (Python-Code-Tool, NICHT Shell):
+**Primaerer Weg: MCP-Tool `mcp__galledia-office__generate_galledia_brief`**
+
+Der MCP-Server `galledia-office` (siehe `https://github.com/galledia-ag/office-ci-mcp`)
+ist via `.mcp.json` mit diesem Plugin verbunden. Rufe das Tool mit dem
+gesammelten JSON-Datensatz auf:
 
 ```python
-import json, subprocess, sys
-from pathlib import Path
-
-skill_dir = Path(__file__).parent if "__file__" in dir() else Path.cwd()
-# Wenn skill_dir nicht stimmt: nutze den Skill-Pfad aus dem Plugin-Kontext
-
-data = {
-    "sender_oe": "...",
-    "sender_street": "...",
+result = mcp__galledia_office__generate_galledia_brief(data={
+    "sender_oe": "Galledia Fachmedien AG",
+    "sender_street": "Buckhauserstrasse 24",
     # ... (siehe Schema)
-}
-
-output_path = "/tmp/brief.docx"  # oder ein anderer schreibbarer Pfad
-result = subprocess.run(
-    [sys.executable, str(skill_dir / "scripts" / "fill_brief.py"),
-     "--input", "-", "--output", output_path],
-    input=json.dumps(data), text=True, capture_output=True
-)
-print(result.stdout)
-if result.returncode != 0:
-    print("FEHLER:", result.stderr)
+})
 ```
 
-Alternative — falls `subprocess` nicht verfuegbar oder unkomfortabel:
-importiere direkt:
+Das Tool liefert ein dict zurueck:
+- `filename` — z.B. `Brief_Offerte_2026.docx`
+- `mimetype` — `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+- `content_base64` — Datei-Inhalt base64-kodiert
+- `size_bytes` — Groesse
+- `report` — Befuellungs-Statistik
+- `validation_errors` — leer falls OK, sonst Fehlerbeschreibung
 
-```python
-import sys
-sys.path.insert(0, str(skill_dir / "scripts"))
-from fill_brief import fill, ValidationError
+**Bei Validation-Fehlern**: kein Dokument generiert, dem User die Fehler zeigen
+und korrekte Werte vorschlagen.
 
-try:
-    report = fill(data, skill_dir / "templates" / "Brief-Vorlage Galledia.dotx",
-                  Path(output_path))
-    print(report)
-except ValidationError as e:
-    print("CI-Verstoss:", e)
+**Bei Erfolg**: Datei dem User als Download anbieten (Frontend-spezifisch:
+in Cowork/Claude direkt als Datei-Anhang, in Claude Code via Write auf Disk).
+
+**Fallback: lokales Python-Skript** (nur in Claude Code Desktop, falls
+MCP-Server nicht erreichbar):
+
+```powershell
+python "<skill-dir>/scripts/fill_brief.py" --input <data.json> --output <out.docx>
 ```
 
 ### Schritt 4 — Ergebnis dem User liefern

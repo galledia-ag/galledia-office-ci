@@ -99,20 +99,26 @@ befuellt die Slides programmatisch.
 
 ## Aufruf
 
+**Primaerer Weg: MCP-Tool `mcp__galledia-office__generate_galledia_praesentation`**
+
 ```python
-import json, subprocess, sys
-from pathlib import Path
+result = mcp__galledia_office__generate_galledia_praesentation(data={
+    "organisation": "Galledia Fachmedien AG",
+    "slides": [
+        {"layout": "title", "title": "...", "subtitle": "..."},
+        {"layout": "agenda", "title": "...", "items": ["...", "..."]},
+        {"layout": "content", "title": "...", "content": "..."}
+    ]
+})
+```
 
-data = {
-  "organisation": "Galledia Fachmedien AG",
-  "slides": [ ... ]
-}
+Returns: `{filename, mimetype, content_base64, size_bytes, report, validation_errors}`.
+`mimetype` ist `application/vnd.openxmlformats-officedocument.presentationml.presentation`.
 
-result = subprocess.run(
-    [sys.executable, str(skill_dir / "scripts" / "fill_praesentation.py"),
-     "--input", "-", "--output", "/tmp/praesentation.pptx"],
-    input=json.dumps(data), text=True, capture_output=True, encoding="utf-8"
-)
+**Fallback** (Claude Code Desktop, ohne MCP):
+
+```powershell
+python "<skill-dir>/scripts/fill_praesentation.py" --input <data.json> --output <out.pptx>
 ```
 
 ## CI-Regeln

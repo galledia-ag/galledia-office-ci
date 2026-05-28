@@ -2,10 +2,11 @@
 
 Claude Code Plugin für CI/CD-konforme Office-Dokumente der Galledia-Gruppe.
 
-**Aktueller Stand (V0.2):** Drei Skills im Plugin:
+**Aktueller Stand (V0.3):** Drei Skills + MCP-Server:
 - `galledia-brief` — Geschäftsbrief (.docx)
-- `galledia-kurzbrief` — Kurzbrief / Begleitschreiben mit 10 Notizoptionen (.docx)
-- `galledia-praesentation` — PowerPoint-Präsentation mit 16 Slide-Layouts (.pptx)
+- `galledia-kurzbrief` — Kurzbrief mit 10 Notizoptionen (.docx)
+- `galledia-praesentation` — PowerPoint mit 16 Layouts (.pptx)
+- MCP-Server `galledia-office-mcp` ([Repo](https://github.com/galledia-ag/office-ci-mcp)) — generiert die Dokumente, sodass die Skills in **Cowork (Web + Desktop)** und Claude Code funktionieren — ohne Abhängigkeit von der claude.ai-Sandbox-VM.
 
 Alle auf Basis der offiziellen Galledia-Vorlagen gemäss Markenhandbuch v1.5.
 
@@ -88,7 +89,8 @@ Es gibt aktuell keinen dedizierten Brand-Guard — Template-Pflege läuft über 
 | V0.1 | Brief (`.docx`) | ✅ Fertig |
 | V0.1.2 | Encoding-Robustheit (UTF-8/BOM/cp1252/Mojibake-Auto-Repair) | ✅ Fertig |
 | V0.2 | Kurzbrief (`.docx`) + Präsentation (`.pptx`) | ✅ Fertig |
-| V0.3 | Skill-Bundles für Marketing-/Sales-Templates | geplant |
+| V0.3 | MCP-Server für Cowork-Kompatibilität (kein Sandbox-VM mehr nötig) | ✅ Fertig |
+| V0.4 | Skill-Bundles für Marketing-/Sales-Templates | geplant |
 
 ## Technischer Hintergrund
 

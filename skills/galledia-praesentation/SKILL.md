@@ -62,10 +62,36 @@ Frage den User nach:
 
 **Pro Folie:**
 - `layout` (Pflicht) — Key aus Tabelle oben
-- `title` — Folientitel
-- `subtitle` — Untertitel (v.a. fuer Titelfolien)
+- `title` — Folientitel (oder Topic-Ueberschrift bei Content-Folien)
+- `subtitle` — Untertitel bei Titelfolien / Section-Header bei Content-Folien
 - `content` — Hauptinhalt als String mit `\n` fuer Zeilenumbrueche
 - `items` — Alternative zu content als Array (z.B. Agenda)
+
+**Wichtig — Placeholder-Mapping pro Layout-Typ:**
+
+| Layout-Typ | `title` → | `subtitle` → | `content` → |
+|---|---|---|---|
+| `title` (Titelfolie) | grosser Hero-Titel | kleiner Untertitel oben | — |
+| `section` (Zwischenfolie) | Kapitel-Titel | — | — |
+| `content`/`agenda`/etc. | kleine Topic-Ueberschrift | mittlerer Section-Header | grosser Hauptinhaltsbereich |
+
+Beispiel Inhaltsfolie:
+```json
+{
+  "layout": "content",
+  "title": "Vision & Ziel",
+  "subtitle": "Ein KI-System, das mich kennt",
+  "content": "Aggregation aller Kanäle: E-Mail, WhatsApp, Dokumente\nVolltext- und Vektorsuche über 50 000+ Nachrichten\nAutomatische Klassifizierung und Antwortvorschläge"
+}
+```
+
+**Pflicht-Folien (werden automatisch eingefuegt falls fehlend):**
+- Titelfolie vorne — wenn erste Folie kein `title`-Layout, wird automatisch
+  eine vorangestellt
+- Agenda-Folie als Position 2 — generiert aus Titeln der Content-Folien
+- Schlussfolie hinten — Titelfolie rot mit „Vielen Dank / fuer Ihre Aufmerksamkeit"
+
+Deaktivierbar via `enforce_mandatory_slides: false`.
 
 **Bullets:** Schreibe einfach jede Zeile fuer sich (mit `\n` getrennt) —
 PowerPoint setzt die Bullet-Glyphe automatisch ueber den Layout-Style.

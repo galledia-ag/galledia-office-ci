@@ -79,6 +79,65 @@ class ValidationError(Exception):
 
 
 # ---------------------------------------------------------------------------
+# Input decoding & mojibake repair
+# ---------------------------------------------------------------------------
+
+# Common mojibake sequences that indicate UTF-8 bytes read as Latin-1/cp1252.
+# Detecting any of these signals the string was double-encoded somewhere upstream.
+MOJIBAKE_MARKERS = (
+    "Ã¼", "Ã¶", "Ã¤", "ÃŸ",         # ü ö ä ß as UTF-8 bytes read as Latin-1
+    "Ãœ", "Ã–", "Ã„",               # Ü Ö Ä
+    "Ã©", "Ã¨", "Ã ", "Ã§",         # é è à ç
+    "Â·", "Â«", "Â»", "Â§", "Â°",   # · « » § °
+    "â€™", "â€œ", "â€",              # smart quotes / dashes UTF-8 → Win-1252
+)
+
+
+def _decode_input(raw: bytes) -> str:
+    """
+    Decode JSON input bytes. Tolerates UTF-8 with/without BOM, falls back to
+    cp1252 if UTF-8 fails (rare but happens when a caller writes JSON in the
+    Windows default codepage).
+    """
+    # UTF-8 with optional BOM
+    if raw.startswith(b"\xef\xbb\xbf"):
+        return raw[3:].decode("utf-8")
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return raw.decode("cp1252")
+
+
+def _repair_mojibake(obj):
+    """
+    Recursively walk a JSON-loaded structure and repair mojibake in strings.
+    """
+    if isinstance(obj, dict):
+        return {k: _repair_mojibake(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_repair_mojibake(v) for v in obj]
+    if isinstance(obj, str):
+        return _fix_mojibake_string(obj)
+    return obj
+
+
+def _fix_mojibake_string(s: str) -> str:
+    """
+    If `s` looks like mojibake (UTF-8 bytes interpreted as Latin-1/cp1252),
+    return the repaired version. Otherwise return the original.
+    """
+    if not s or not any(m in s for m in MOJIBAKE_MARKERS):
+        return s
+    try:
+        # Round-trip: re-encode as Latin-1 to get back the original UTF-8 bytes,
+        # then decode them properly as UTF-8.
+        repaired = s.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return s
+    return repaired
+
+
+# ---------------------------------------------------------------------------
 # Validation
 # ---------------------------------------------------------------------------
 
@@ -694,10 +753,16 @@ def main() -> int:
     args = ap.parse_args()
 
     if args.input == "-":
-        data = json.load(sys.stdin)
+        # Read stdin as raw bytes, decode UTF-8 explicitly. The default
+        # sys.stdin encoding on Windows is cp1252, which corrupts non-ASCII
+        # input from callers that pipe UTF-8 (e.g. Claude tools).
+        raw = sys.stdin.buffer.read()
+        data = json.loads(_decode_input(raw))
     else:
-        with open(args.input, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        with open(args.input, "rb") as f:
+            data = json.loads(_decode_input(f.read()))
+
+    data = _repair_mojibake(data)
 
     try:
         report = fill(data, Path(args.template), Path(args.output))

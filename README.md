@@ -2,7 +2,12 @@
 
 Claude Code Plugin für CI/CD-konforme Office-Dokumente der Galledia-Gruppe.
 
-**Aktueller Stand (V0.1):** Brief (`.docx`) auf Basis der offiziellen Galledia-Vorlage gemäss Markenhandbuch v1.5.
+**Aktueller Stand (V0.2):** Drei Skills im Plugin:
+- `galledia-brief` — Geschäftsbrief (.docx)
+- `galledia-kurzbrief` — Kurzbrief / Begleitschreiben mit 10 Notizoptionen (.docx)
+- `galledia-praesentation` — PowerPoint-Präsentation mit 16 Slide-Layouts (.pptx)
+
+Alle auf Basis der offiziellen Galledia-Vorlagen gemäss Markenhandbuch v1.5.
 
 ## Was macht das Plugin
 
@@ -81,8 +86,9 @@ Es gibt aktuell keinen dedizierten Brand-Guard — Template-Pflege läuft über 
 | Version | Inhalt | Status |
 |---|---|---|
 | V0.1 | Brief (`.docx`) | ✅ Fertig |
-| V0.2 | Kurzbrief (`.dotx`) | geplant |
-| V0.3 | Präsentation (`.potx`, `python-pptx`) | geplant |
+| V0.1.2 | Encoding-Robustheit (UTF-8/BOM/cp1252/Mojibake-Auto-Repair) | ✅ Fertig |
+| V0.2 | Kurzbrief (`.docx`) + Präsentation (`.pptx`) | ✅ Fertig |
+| V0.3 | Skill-Bundles für Marketing-/Sales-Templates | geplant |
 
 ## Technischer Hintergrund
 

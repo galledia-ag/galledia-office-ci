@@ -1,0 +1,25 @@
+{
+  "sender_oe": "Galledia Fachmedien AG",
+  "sender_street": "Buckhauserstrasse 24",
+  "sender_city": "8048 Zürich",
+  "sender_contact_name": "Stefan Zimmermann",
+  "sender_contact_phone": "T +41 58 344 96 22",
+  "sender_contact_mobile": "M +41 78 846 24 16",
+  "sender_contact_email": "stefan.zimmermann@galledia.ch",
+  "recipient_lines": [
+    "Müller AG",
+    "Hans Müller",
+    "Bahnhofstrasse 1",
+    "8001 Zürich"
+  ],
+  "date_city": "Zürich",
+  "date": "28. Mai 2026",
+  "subject": "Vertragsentwurf Inserate-Kampagne 2026",
+  "introduction": "Sehr geehrter Herr Müller",
+  "closing": "Freundliche Grüsse",
+  "signatory_name": "Stefan Zimmermann",
+  "signatory_role": "Leitung Fachmedien & Digital\nMitglied der Gruppenleitung",
+  "notes": {
+    "Note10": "Beilagen: Vertragsentwurf, AGB"
+  }
+}

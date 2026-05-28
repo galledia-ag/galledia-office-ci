@@ -7,7 +7,10 @@
   "plugins": [
     {
       "name": "galledia-office-ci",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "galledia-ag/galledia-office-ci"
+      },
       "description": "CI/CD-konforme Office-Dokumente fuer Galledia (Brief)",
       "version": "0.1.0"
     }

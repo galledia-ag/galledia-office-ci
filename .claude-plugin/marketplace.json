@@ -12,7 +12,7 @@
         "repo": "galledia-ag/galledia-office-ci"
       },
       "description": "CI/CD-konforme Office-Dokumente fuer Galledia: Brief, Kurzbrief und Praesentation (Skills + Slash-Commands + MCP-Server, Cowork-tauglich)",
-      "version": "0.6.0"
+      "version": "0.7.0"
     }
   ]
 }

@@ -4,6 +4,9 @@ test/*.png
 test/debug_*.py
 test/bisect_*.py
 test/minimal_*.py
+test/in_*.json
+test/input_*.json
+test/out_*.docx
 **/__pycache__/
 *.pyc
 .venv/

@@ -40,8 +40,9 @@ Frage den User nach:
 | `section_turquoise`, `section_bronze`, `section_purple`, `section_lila` | Andere Farben | |
 | `agenda` | 01_Agenda 5 | Inhaltsuebersicht |
 | `agenda_22` | 01_Agenda 22 | Alternative Agenda |
-| `content` | 02_wenigText | Standard-Inhaltsfolie |
-| `content_long` | 04_vielText | Detail-Folien |
+| `content` | 04_vielText | **Standard fuer Inhaltsfolien mit Fliesstext und Bullets** |
+| `content_long` | 04_vielText | Alias zu content (gleicher Layout) |
+| `content_short`, `content_plakativ` | 02_wenigText | Plakative Kurz-Botschaften (3-5 Worte HUGE), z.B. „Einfach. Persoenlich. Wirkungsvoll." |
 | `default` | DEFAULT SLIDE | Generischer Inhalt |
 | `blank` | Leer | Custom-Inhalt |
 
@@ -63,8 +64,19 @@ Frage den User nach:
 - `layout` (Pflicht) — Key aus Tabelle oben
 - `title` — Folientitel
 - `subtitle` — Untertitel (v.a. fuer Titelfolien)
-- `content` — Hauptinhalt als String mit `\n` und `· ` fuer Bullets
+- `content` — Hauptinhalt als String mit `\n` fuer Zeilenumbrueche
 - `items` — Alternative zu content als Array (z.B. Agenda)
+
+**Bullets:** Schreibe einfach jede Zeile fuer sich (mit `\n` getrennt) —
+PowerPoint setzt die Bullet-Glyphe automatisch ueber den Layout-Style.
+Wenn du `· ` oder `- ` am Zeilenanfang setzt, wird das vom Skript
+entfernt (sonst Doppel-Bullet).
+
+**Layout-Wahl ist entscheidend fuer das Aussehen:**
+- Volltextfolien mit Bulletlisten oder Fliesstext → `content` (default)
+- Nur 3-5 Stichworte plakativ HUGE → `content_short`
+- Eine Agenda mit Aufzaehlung → `agenda`
+- Kapitel-Trennung → `section`
 
 **Optional Top-Level:**
 - `replace_existing_slides` (Default `true`) — wenn `false` bleiben die

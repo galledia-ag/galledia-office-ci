@@ -1,0 +1,15 @@
+{
+  "name": "galledia-office-ci",
+  "owner": {
+    "name": "Galledia",
+    "url": "https://galledia.ch"
+  },
+  "plugins": [
+    {
+      "name": "galledia-office-ci",
+      "source": ".",
+      "description": "CI/CD-konforme Office-Dokumente fuer Galledia (Brief)",
+      "version": "0.1.0"
+    }
+  ]
+}

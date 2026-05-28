@@ -1,0 +1,11 @@
+test/*.docx
+test/*.pdf
+test/*.png
+test/debug_*.py
+test/bisect_*.py
+test/minimal_*.py
+**/__pycache__/
+*.pyc
+.venv/
+.DS_Store
+Thumbs.db

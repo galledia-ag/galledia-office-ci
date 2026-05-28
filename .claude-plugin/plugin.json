@@ -1,0 +1,10 @@
+{
+  "name": "galledia-office-ci",
+  "version": "0.1.0",
+  "description": "CI/CD-konforme Office-Dokumente fuer Galledia (Brief, spaeter Kurzbrief und Praesentation). Stellt Vorlagen und Generierungs-Skill bereit gemaess Galledia-Markenhandbuch v1.5.",
+  "author": {
+    "name": "Galledia Fachmedien AG",
+    "email": "fachmedien@galledia.ch"
+  },
+  "homepage": "https://galledia.ch"
+}

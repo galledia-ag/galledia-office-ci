@@ -76,13 +76,29 @@ JSON-Datensatz auf.
 Das Tool liefert zurueck:
 - `filename` — z.B. `Brief_Offerte_2026.docx`
 - `mimetype` — Word-Dokument
-- `content_base64` — Datei-Inhalt
-- `size_bytes`, `report`, `validation_errors`
+- `download_url` — fertiger HTTPS-Link zur Datei (TTL 1h)
+- `size_bytes`, `expires_in_seconds`, `report`, `validation_errors`
 
 Bei `validation_errors`: Fehler dem User zeigen und korrekte Werte
 vorschlagen, dann erneut.
 
-Bei Erfolg: Datei dem User als Download anbieten.
+### Schritt 4 — Link dem User praesentieren
+
+**WICHTIG: Versuche NIE selbst, die `download_url` per HTTP/curl/web_fetch
+herunterzuladen.** Das ist nicht dein Job — das macht der User selbst.
+Praesentiere die URL einfach als Markdown-Link mit dem `filename` als
+sichtbarem Text:
+
+```markdown
+Hier ist der Brief: [Brief_Offerte_2026.docx](https://office-mcp.epimetheus.uk/files/...)
+
+Gueltig fuer 60 Minuten.
+```
+
+Antworte kurz und sachlich. Wiederhole nicht den ganzen Brieftext im
+Chat — der User oeffnet die Datei in Word. Erwaehne nur stichwortartig
+was generiert wurde (Empfaenger, Betreff) und ob es Hinweise gibt
+(z.B. Validierungs-Warnings die ok sind).
 
 ## CI-Regeln (Markenhandbuch v1.5)
 

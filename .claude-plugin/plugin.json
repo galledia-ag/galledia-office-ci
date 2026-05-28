@@ -1,7 +1,7 @@
 {
   "name": "galledia-office-ci",
-  "version": "0.4.0",
-  "description": "CI/CD-konforme Office-Dokumente fuer Galledia gemaess Markenhandbuch v1.5. Drei Skills (Brief, Kurzbrief, Praesentation), die alle den MCP-Server galledia-office-mcp fuer die eigentliche Generierung nutzen. Prose-only Skills, kein lokales Python — funktioniert in Cowork (Web + Desktop) unabhaengig von Sandbox-VM.",
+  "version": "0.5.0",
+  "description": "CI/CD-konforme Office-Dokumente fuer Galledia gemaess Markenhandbuch v1.5. Drei Skills (Brief, Kurzbrief, Praesentation) plus Slash-Commands (/brief, /kurzbrief, /praesentation). Backend: galledia-office-mcp (HTTP) auf epimetheus.uk. Funktioniert in Cowork Web + Desktop unabhaengig von Sandbox-VM.",
   "author": {
     "name": "Galledia Fachmedien AG",
     "email": "fachmedien@galledia.ch"
@@ -12,5 +12,6 @@
     "skills/galledia-kurzbrief",
     "skills/galledia-praesentation"
   ],
+  "commands": "commands/",
   "mcpServers": ".mcp.json"
 }

@@ -67,8 +67,21 @@ Identisch zum Brief — siehe `references/schreibweisen.md`.
 
 `mcp__galledia-office__generate_galledia_kurzbrief` mit dem JSON.
 
-Returns: `{filename, mimetype, content_base64, size_bytes, report,
-validation_errors}` — bei Erfolg Datei dem User anbieten.
+Returns: `{filename, mimetype, download_url, size_bytes,
+expires_in_seconds, report, validation_errors}`.
+
+### Schritt 4 — Link dem User praesentieren
+
+**WICHTIG: Versuche NIE selbst, die `download_url` per HTTP/curl/web_fetch
+herunterzuladen.** Praesentiere die URL als Markdown-Link mit dem
+`filename` als sichtbarem Text:
+
+```markdown
+Hier ist der Kurzbrief: [Kurzbrief_Vertragsentwurf.docx](https://office-mcp.epimetheus.uk/files/...)
+```
+
+Erwaehne kurz die wichtigsten Felder (Empfaenger, Betreff, ueberschriebene
+Notes). Antworte sachlich, ohne den Inhalt zu wiederholen.
 
 ## Was NICHT in diesem Skill
 

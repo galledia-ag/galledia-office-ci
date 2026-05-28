@@ -74,7 +74,21 @@ Frage den User nach:
 
 `mcp__galledia-office__generate_galledia_praesentation` mit dem JSON.
 
-Returns wie bei den anderen Skills. Bei Erfolg Datei dem User anbieten.
+Returns: `{filename, mimetype, download_url, size_bytes,
+expires_in_seconds, report, validation_errors}`.
+
+### Schritt 4 — Link dem User praesentieren
+
+**WICHTIG: Versuche NIE selbst, die `download_url` per HTTP/curl/web_fetch
+herunterzuladen.** Praesentiere die URL als Markdown-Link mit dem
+`filename` als sichtbarem Text:
+
+```markdown
+Hier ist deine Praesentation: [Praesentation_Kunde_X.pptx](https://office-mcp.epimetheus.uk/files/...)
+```
+
+Liste kurz die generierten Folien stichwortartig auf (Layout + Titel)
+damit der User sieht, was drin ist. Antworte sachlich.
 
 ## CI-Regeln
 

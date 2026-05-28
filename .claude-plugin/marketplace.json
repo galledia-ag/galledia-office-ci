@@ -11,8 +11,8 @@
         "source": "github",
         "repo": "galledia-ag/galledia-office-ci"
       },
-      "description": "CI/CD-konforme Office-Dokumente fuer Galledia: Brief, Kurzbrief und Praesentation (Prose-only Skills + MCP-Server, Cowork-tauglich ohne Sandbox-VM)",
-      "version": "0.4.0"
+      "description": "CI/CD-konforme Office-Dokumente fuer Galledia: Brief, Kurzbrief und Praesentation (Skills + Slash-Commands + MCP-Server, Cowork-tauglich)",
+      "version": "0.5.0"
     }
   ]
 }

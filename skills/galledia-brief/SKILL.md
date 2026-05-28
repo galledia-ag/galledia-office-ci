@@ -7,158 +7,92 @@ description: >
   Schreiben im Namen einer Galledia-Organisationseinheit erstellen will.
   Triggert auf: "Brief", "schreibe einen Brief", "Geschaeftsbrief",
   "Anschreiben", "Kundenbrief", "Schreiben an", "Offertschreiben",
-  "Begleitbrief". Liefert eine fertige .docx im Galledia-CI als Download.
-  Arbeitssprache: Schweizer Hochdeutsch (ss statt ss, also "Grüsse" nicht "Grüße").
+  "Begleitbrief", "Bewerbungsschreiben (von Galledia an Kandidat)".
+  Liefert eine fertige .docx im Galledia-CI als Download.
+  Arbeitssprache: Schweizer Hochdeutsch (ss statt scharf-s, also "Grüsse"
+  nicht "Grüße"). Die Dokumentengenerierung erfolgt ausschliesslich ueber
+  den MCP-Server galledia-office (kein lokales Python-Skript noetig).
 ---
 
 # Galledia Geschaeftsbrief
 
-Du erstellst CI/CD-konforme Geschaeftsbriefe fuer die Galledia-Gruppe. Die
-offizielle Word-Vorlage (`templates/Brief-Vorlage Galledia.dotx`) liegt
-mit im Skill und enthaelt Logo, Volte-Schrift, Schutzzone und Adresszeile
-bereits korrekt — die fuellst du nur noch mit Inhalten. Das Python-Skript
-`scripts/fill_brief.py` uebernimmt die XML-Manipulation und liefert eine
-fertige `.docx`.
+Du hilfst dem User, einen CI/CD-konformen Geschaeftsbrief zu erstellen.
+Die eigentliche Generierung macht der MCP-Server `galledia-office`
+(siehe https://github.com/galledia-ag/office-ci-mcp), der die offizielle
+Galledia-Vorlage automatisch befuellt — Logo, Volte-Schrift, Schutzzone,
+Adresszeile, Schreibweisen kommen alle korrekt aus der Vorlage.
 
----
-
-## Workflow (in dieser Reihenfolge)
+## Workflow
 
 ### Schritt 1 — Daten sammeln
 
-Frage den User nach allen fehlenden Pflicht-Feldern. Frage NIE nach Daten,
-die der User in seiner Anfrage schon genannt hat. Wenn ein Feld plausibel
-abgeleitet werden kann (z.B. Datum = heute, sender_contact_name aus Kontext),
-nutze die Ableitung und erwaehne sie kurz.
+Frage den User nach **fehlenden Pflichtfeldern**. Frage NIE nach Daten, die
+der User schon in seiner Anfrage genannt hat. Ableitbare Werte
+(z.B. aktuelles Datum, Absender-Name aus Kontext) selbstaendig setzen und
+nur kurz erwaehnen.
 
-### Schritt 2 — Validierung gegen Galledia-CI
+**Pflichtfelder:**
+- `sender_oe` — eine von: `galledia group ag` (klein!),
+  `Galledia Fachmedien AG`, `Galledia Regionalmedien AG`,
+  `Galledia Print AG`, `Galledia Digital AG`
+- `sender_street`, `sender_city` (z.B. `Buckhauserstrasse 24` / `8048 Zürich`)
+- `sender_contact_name` (Sachbearbeiter:in)
+- `recipient_lines` — Liste von Strings (Empfaenger-Adresse, je Zeile ein Eintrag)
+- `date_city` (Absendeort, z.B. `Zürich`) und `date` (z.B. `28. Mai 2026`)
+- `subject` (Betreff)
+- `body` (Brieftext)
 
-Pruefe vor dem Generieren:
+**Optionale Felder:**
+- `sender_contact_phone` — Format `T +41 58 344 96 22`
+- `sender_contact_mobile` — Format `M +41 78 846 24 16`
+- `sender_contact_email`
+- `introduction` — Default `Sehr geehrte Damen und Herren`
+- `closing` — Default `Freundliche Grüsse`
+- `signatory_name`, `signatory_role` (mehrere Rollen via `\n` trennen
+  oder als Array)
+- `enclosures`, `copy_to`
 
-- **Organisationseinheit** ist genau eine von:
-  `galledia group ag` (klein!), `Galledia Fachmedien AG`,
-  `Galledia Regionalmedien AG`, `Galledia Print AG`, `Galledia Digital AG`
-- **Telefonformat**: `T +41 58 344 96 22` bzw. `M +41 79 XXX XX XX`
-  (Praefix `T`/`M`, Leerzeichen, `+41` Pflicht)
-- **Sonderzeichen**: Bullets `·`, Anfuehrungszeichen `« »` (nie `"`),
-  Trenner `|`. KEIN `-`, `•`, `*` als Aufzaehlung.
-- **Verboten**: "Galledia AG", "Galledia Gruppe", "Fax"
+**Body-Format:**
+- Doppelte Newlines `\n\n` = Absatzwechsel
+- Einfache Newlines `\n` = Zeilenumbruch im selben Absatz
+- Zeilen mit `· ` am Anfang werden zu Word-Aufzaehlungspunkten
 
-Bei Verstoss: KEIN Brief generieren, sondern den User auf den Fehler
-hinweisen und korrigieren lassen.
+### Schritt 2 — CI-Validierung im Kopf
 
-### Schritt 3 — Brief generieren
+Pruefe vor dem Aufruf:
+- Schreibweise der OE exakt eine der 5 erlaubten
+- Telefonformat `T +41 …` / `M +41 …`
+- Keine geraden Anfuehrungszeichen — Galledia verlangt `« »` (Guillemets)
+- Keine verbotenen Begriffe: "Galledia AG", "Galledia Gruppe",
+  "Galledia GmbH", "Fax" (letzteres verwendet Galledia nicht mehr)
 
-Baue ein JSON-Objekt mit allen Daten zusammen (siehe Schema unten) und
-rufe `fill_brief.py` via Python aus. Das Skript validiert nochmal,
-befuellt die Vorlage und schreibt die `.docx`-Datei.
+Bei Verstoss: User darauf hinweisen, KEIN Brief generieren.
 
-**Primaerer Weg: MCP-Tool `mcp__galledia-office__generate_galledia_brief`**
+### Schritt 3 — MCP-Tool aufrufen
 
-Der MCP-Server `galledia-office` (siehe `https://github.com/galledia-ag/office-ci-mcp`)
-ist via `.mcp.json` mit diesem Plugin verbunden. Rufe das Tool mit dem
-gesammelten JSON-Datensatz auf:
+Rufe `mcp__galledia-office__generate_galledia_brief` mit dem gesammelten
+JSON-Datensatz auf.
 
-```python
-result = mcp__galledia_office__generate_galledia_brief(data={
-    "sender_oe": "Galledia Fachmedien AG",
-    "sender_street": "Buckhauserstrasse 24",
-    # ... (siehe Schema)
-})
-```
-
-Das Tool liefert ein dict zurueck:
+Das Tool liefert zurueck:
 - `filename` — z.B. `Brief_Offerte_2026.docx`
-- `mimetype` — `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
-- `content_base64` — Datei-Inhalt base64-kodiert
-- `size_bytes` — Groesse
-- `report` — Befuellungs-Statistik
-- `validation_errors` — leer falls OK, sonst Fehlerbeschreibung
+- `mimetype` — Word-Dokument
+- `content_base64` — Datei-Inhalt
+- `size_bytes`, `report`, `validation_errors`
 
-**Bei Validation-Fehlern**: kein Dokument generiert, dem User die Fehler zeigen
-und korrekte Werte vorschlagen.
+Bei `validation_errors`: Fehler dem User zeigen und korrekte Werte
+vorschlagen, dann erneut.
 
-**Bei Erfolg**: Datei dem User als Download anbieten (Frontend-spezifisch:
-in Cowork/Claude direkt als Datei-Anhang, in Claude Code via Write auf Disk).
+Bei Erfolg: Datei dem User als Download anbieten.
 
-**Fallback: lokales Python-Skript** (nur in Claude Code Desktop, falls
-MCP-Server nicht erreichbar):
+## CI-Regeln (Markenhandbuch v1.5)
 
-```powershell
-python "<skill-dir>/scripts/fill_brief.py" --input <data.json> --output <out.docx>
-```
+Siehe `references/schreibweisen.md`, `references/adressbloecke.md` und
+`references/markenhandbuch_kurzfassung.md` fuer die vollstaendigen Regeln
+und Standort-Adressen.
 
-### Schritt 4 — Ergebnis dem User liefern
+## Was NICHT in diesem Skill
 
-- Bei Erfolg: Die `.docx`-Datei dem User zum Download anbieten
-- Bei Validierungsfehler: Fehlertext anzeigen, korrekte Werte vorschlagen,
-  erneut versuchen
-
----
-
-## JSON-Schema
-
-### Pflichtfelder
-
-| Feld | Beispiel | Hinweis |
-|---|---|---|
-| `sender_oe` | `Galledia Fachmedien AG` | exakte Schreibweise — siehe `references/schreibweisen.md` |
-| `sender_street` | `Buckhauserstrasse 24` | |
-| `sender_city` | `8048 Zürich` | mit PLZ |
-| `sender_contact_name` | `Stefan Zimmermann` | Sachbearbeiter:in |
-| `recipient_lines` | `["Müller AG", "Hans Müller", "Bahnhofstrasse 1", "8001 Zürich"]` | Array, je Zeile ein Eintrag |
-| `date_city` | `Zürich` | Absendeort, ohne PLZ |
-| `date` | `28. Mai 2026` | Datum |
-| `subject` | `Offerte für Inserate-Kampagne 2026` | Betreff |
-| `body` | siehe unten | Brieftext |
-
-### Optional
-
-| Feld | Beispiel | Default |
-|---|---|---|
-| `sender_contact_phone` | `T +41 58 344 96 22` | — |
-| `sender_contact_mobile` | `M +41 78 846 24 16` | — |
-| `sender_contact_email` | `vorname.nachname@galledia.ch` | — |
-| `introduction` | `Sehr geehrter Herr Müller` | `Sehr geehrte Damen und Herren` |
-| `closing` | `Freundliche Grüsse` | `Freundliche Grüsse` |
-| `signatory_name` | `Stefan Zimmermann` | = `sender_contact_name` |
-| `signatory_role` | siehe unten | — |
-| `enclosures` | `Beilagen: Offerte 2026-123` | — |
-| `copy_to` | `Kopie an: Geschäftsleitung` | — |
-
-### Body-Format
-
-`body` ist ein String. Regeln:
-
-- **Absatzwechsel:** Doppelter Newline `\n\n`
-- **Zeilenumbruch im selben Absatz:** Einfacher Newline `\n`
-- **Bullet-Liste:** Zeile mit `· ` am Anfang → wird zu Word-Aufzaehlung
-  (Style `Aufzhlungszeichen`). Der `·` im Input erscheint **nicht** im
-  Output — Word setzt den richtigen Bullet-Punkt automatisch.
-
-Beispiel:
-```
-"vielen Dank für Ihr Interesse.\n\nWir bieten:\n· Basic: …\n· Premium: …\n\nGerne …"
-```
-
-### signatory_role (mehrere Rollen)
-
-- String mit `\n`-Trenner: `"Leitung Fachmedien & Digital\nMitglied der Gruppenleitung"`
-- Oder Array: `["Leitung Fachmedien & Digital", "Mitglied der Gruppenleitung"]`
-
----
-
-## Was NICHT zu diesem Skill gehoert
-
-- Offerten/Angebote → das macht `fachmedien-mediaberatung`-Plugin via CRM
-- Kurzbrief → kommt in V2 als separater Skill `galledia-kurzbrief`
-- Praesentation → V3, separater Skill `galledia-praesentation`
-
-## Referenzen im Skill-Bundle
-
-- `references/schreibweisen.md` — 5 OE, Telefon, Sonderzeichen
-- `references/adressbloecke.md` — alle Galledia-Standorte mit Adressen
-- `references/markenhandbuch_kurzfassung.md` — extrahierte CI-Kernregeln
-- `templates/Brief-Vorlage Galledia.dotx` — die offizielle Word-Vorlage
-- `scripts/fill_brief.py` — Befuellungs-Skript (lxml, kein python-docx)
-- `scripts/example_input.json` — vollstaendiges Beispiel-Input
+- Kurzbrief mit Standardoptionen → `galledia-kurzbrief`
+- PowerPoint-Praesentation → `galledia-praesentation`
+- Offerten / Angebote → laufen ueber das CRM-Buchungs-Tooling
+  (`fachmedien-mediaberatung`-Plugin)

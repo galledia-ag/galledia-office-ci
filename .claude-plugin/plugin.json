@@ -1,7 +1,7 @@
 {
   "name": "galledia-office-ci",
-  "version": "0.3.0",
-  "description": "CI/CD-konforme Office-Dokumente fuer Galledia gemaess Markenhandbuch v1.5. Drei Skills (Brief, Kurzbrief, Praesentation) + MCP-Server galledia-office-mcp fuer die Dokumentengenerierung. Funktioniert in Cowork Web + Desktop sowie Claude Code — unabhaengig von der claude.ai-Sandbox.",
+  "version": "0.4.0",
+  "description": "CI/CD-konforme Office-Dokumente fuer Galledia gemaess Markenhandbuch v1.5. Drei Skills (Brief, Kurzbrief, Praesentation), die alle den MCP-Server galledia-office-mcp fuer die eigentliche Generierung nutzen. Prose-only Skills, kein lokales Python — funktioniert in Cowork (Web + Desktop) unabhaengig von Sandbox-VM.",
   "author": {
     "name": "Galledia Fachmedien AG",
     "email": "fachmedien@galledia.ch"

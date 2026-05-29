@@ -25,6 +25,11 @@ Alle CI-konformen Galledia-Office-Dokumente in einem Skill.
 
 Bei Unklarheit kurz nachfragen, dann den richtigen Workflow starten.
 
+> ⚠️ **KRITISCH — Tool-Routing:**
+> - Präsentation: **NUR Code Execution** (`helpers.py` + `Vorlage_5.pptx`).  
+>   Das MCP-Tool `generate_galledia_praesentation` ist **DEPRECATED** — **NIE aufrufen**, auch wenn es verfügbar erscheint.
+> - Brief / Kurzbrief: **NUR** `mcp__galledia-office__generate_galledia_brief` / `generate_galledia_kurzbrief`
+
 ---
 
 # CI-Referenz (Markenhandbuch v1.5)
@@ -193,8 +198,20 @@ pip install python-docx --break-system-packages
 ```
 
 ```python
-import sys, os
-sys.path.insert(0, os.path.dirname(__file__))
+import os, sys, urllib.request
+_DIR = "/tmp/galledia_dokument"
+os.makedirs(f"{_DIR}/assets", exist_ok=True)
+sys.path.insert(0, _DIR)
+_BASE = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-dokument"
+for _name, _url in [
+    ("fill_dokument.py",             "fill_dokument.py"),
+    ("assets/Vorlage_Dokument.dotx", "assets/Vorlage_Dokument.dotx"),
+]:
+    _dest = f"{_DIR}/{_name}"
+    if not os.path.exists(_dest):
+        urllib.request.urlretrieve(f"{_BASE}/{_url}", _dest)
+        print(f"✓ {_name} ({os.path.getsize(_dest):,} bytes)")
+
 from fill_dokument import build_document
 ```
 
@@ -251,6 +268,24 @@ pip install python-pptx Pillow --break-system-packages
 ```
 
 ```python
+# Assets von GitHub laden (Verzeichnisstruktur für helpers.py erhalten)
+import os, sys, urllib.request
+_DIR = "/tmp/galledia_praesentation"
+os.makedirs(f"{_DIR}/assets/logo", exist_ok=True)
+sys.path.insert(0, _DIR)
+_BASE = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-praesentation"
+for _name, _url in [
+    ("helpers.py",                   "helpers.py"),
+    ("assets/Vorlage_5.pptx",        "assets/Vorlage_5.pptx"),
+    ("assets/logo/logo_rot.png",     "assets/logo/logo_rot.png"),
+    ("assets/logo/logo_weiss.png",   "assets/logo/logo_weiss.png"),
+    ("assets/logo/logo_schwarz.png", "assets/logo/logo_schwarz.png"),
+]:
+    _dest = f"{_DIR}/{_name}"
+    if not os.path.exists(_dest):
+        urllib.request.urlretrieve(f"{_BASE}/{_url}", _dest)
+        print(f"✓ {_name} ({os.path.getsize(_dest):,} bytes)")
+
 from helpers import (build_presentation, add_title, add_section, add_agenda,
                      add_content, add_closing, add_discussion,
                      kpi_grid, two_column, flow_pipeline, numbered_steps, timeline)

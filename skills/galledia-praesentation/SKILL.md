@@ -1,215 +1,202 @@
 ---
 name: galledia-praesentation
 description: >
-  Erstellt eine Galledia-Praesentation (PowerPoint, .pptx) im CI/CD
-  gemaess Markenhandbuch v1.5. Verwende diesen Skill immer wenn ein User
-  eine Praesentation, Slides, ein Pitch-Deck, eine Kundenpraesentation
-  oder einen Foliensatz im Galledia-Design erstellen will. Triggert auf:
-  "Praesentation", "Foliensatz", "Slides", "Pitch", "Pitch-Deck",
-  "Foliendeck", "Kundenpraesentation", "PowerPoint", "PPT", "Vortrag",
-  "Praesentationsdeck". Liefert eine .pptx mit Galledia-Layouts (Titel
-  rot/tuerkis/bronze/purple/lila, Agenda, Inhalt, Zwischenfolie) und der
-  korrekten Galledia-Typografie (Volte/Volte Rounded). Generierung
-  erfolgt ueber den MCP-Server galledia-office. Arbeitssprache:
-  Schweizer Hochdeutsch.
+  Erstellt und bearbeitet PowerPoint-Präsentationen im Galledia Corporate Design.
+  Verwenden wenn: ein Deck, Slides oder .pptx für Galledia / Galledia Fachmedien / ZSW
+  erstellt, gefüllt oder überarbeitet werden soll. Liefert CI-Mechanik (Layouts, Farben,
+  Schriften, Regeln) — nicht den Inhalt.
+version: "1.0"
+template: assets/Vorlage_5.pptx
 ---
 
-# Galledia Praesentation
+# Galledia-Präsentation
 
-PowerPoint mit 16 Galledia-Slide-Layouts in CI-Farben, Volte-Schrift
-und Galledia-G als Watermark. Erstellung Folie-fuer-Folie konfigurierbar.
+## Zweck
+Ansprechende, abwechslungsreiche Decks im Galledia-CI. CI = Rahmen (Farben, Schrift, Logo,
+Layouts). Gestaltung = freie Komposition INNERHALB dieses Rahmens. Niemals ein Einheits-Layout.
 
-## Workflow
+---
 
-### Schritt 1 — Slide-Struktur planen
+## Voraussetzungen
 
-Frage den User nach:
-- Anzahl Folien
-- Inhalt je Folie (Titel + optional Subtitle/Content/Items)
-- Layout je Folie (siehe Tabelle unten)
-- Ziel-Organisation (Default: `Galledia Fachmedien AG`)
-
-### Zwei Wege zur Folie: Patterns (PROFI) vs. Layouts (KLASSISCH)
-
-Der Skill unterstuetzt zwei Generierungs-Modi:
-
-### Pattern-Modus (empfohlen fuer professionelle Decks)
-
-Setze `pattern` im slide_def — die Folie wird custom komponiert aus
-Shapes (Rechtecke, Linien, Text-Boxen) mit Galledia-Farben und -Schriften.
-Resultat: visuell auf Niveau einer designerten Praesentation.
-
-**Verfuegbare Patterns:**
-
-| Pattern | Wann verwenden | Felder |
+| Asset | Pfad | Status |
 |---|---|---|
-| `hero_split` | **Titelfolie** — Split-Layout rot/schwarz mit Hero-Wort + Titel + Bullets | `hero_text`, `hero_subtitle`, `title`, `description`, `bullets`, `footer` |
-| `numbered_agenda` | **Agenda-Folie** — 5-9 Items mit roten Nummernboxen 01/02/... + Titel + Teaser | `title`, `items: [{title, teaser}]`, `slide_no`, `total`, `context` |
-| `card_grid_3` | **3-Karten-Konzept** (z.B. Kernprinzipien, Strategie-Pfeiler) | `title`, `cards: [{icon, title, bullets}]`, `slide_no`, `total`, `context` |
+| Template | `assets/Vorlage_5.pptx` | ✅ bereit |
+| Volte Regular | `assets/fonts/Volte-Regular.otf` | ✅ bereit |
+| Volte Regular Italic | `assets/fonts/Volte-RegularItalic.otf` | ✅ bereit |
+| Volte Semibold | `assets/fonts/Volte-Semibold.otf` | ✅ bereit |
+| Volte Rounded Regular | `assets/fonts/VolteRounded-Regular.otf` | ✅ bereit |
+| Volte Rounded Semibold | `assets/fonts/VolteRounded-Semibold.otf` | ✅ bereit |
+| Logo rot (Bildmarke)          | `assets/logo/logo_rot.png`              | ✅ bereit |
+| Logo rot + Schriftzug         | `assets/logo/logo_rot_schriftzug.png`   | ✅ bereit |
+| Logo weiss (Bildmarke)        | `assets/logo/logo_weiss.png`            | ✅ bereit |
+| Logo weiss + Schriftzug       | `assets/logo/logo_weiss_schriftzug.png` | ✅ bereit |
+| Logo schwarz (Bildmarke)      | `assets/logo/logo_schwarz.png`          | ✅ bereit |
+| Logo schwarz + Schriftzug     | `assets/logo/logo_schwarz_schriftzug.png` | ✅ bereit |
+| Helper-Library | `helpers.py` | ✅ bereit |
 
-Beispiel hero_split:
-```json
-{
-  "pattern": "hero_split",
-  "hero_text": "AI HUB",
-  "hero_subtitle": "Motorex AG\nForschung & Entwicklung",
-  "title": "Modularer On-Site AI-Hub",
-  "description": "Lokale KI-Infrastruktur — sicher, skalierbar, lizenzfrei.",
-  "bullets": ["Datensicherheit – keine Cloud", "Open Source", "Phase 1 → 2"],
-  "footer": "Konzept · Mai 2026"
-}
+Tools: `pip install python-pptx Pillow --break-system-packages`
+
+---
+
+## Goldene Regel: «Reduced to the max»
+
+Markenwerte: einfach — persönlich — wirkungsvoll. Pro Folie EINE Aussage.
+Lieber 8 klare Folien als 4 volle. Whitespace ist Teil des Designs.
+
+**Treatment nach Inhalt (Markenhandbuch S. 42):**
+- emotional / plakativ → Bild dominant, wenig Text → `02_wenigText`, Titelfolie, Zwischenfolie
+- informativ / sachlich → typografisch, strukturiert → `04_vielText`, Agenda
+- Niemals ALLE Folien typografisch → Bleiwüste
+
+---
+
+## Workflow (4 Schritte)
+
+**Pflicht vor dem ersten `build_presentation()`-Aufruf:**
+Wenn Datum und/oder Rechtseinheit im Gespräch nicht bekannt sind → User fragen:
+- «Für welches Datum soll die Fusszeile gesetzt werden? (Beispiel: 29. Mai 2026)»
+- «Für welche Rechtseinheit? (Beispiel: Galledia Fachmedien AG)»
+Erst nach Antwort fortfahren.
+
+```python
+from helpers import build_presentation, add_title, add_section, add_content
+from helpers import kpi_grid, two_column, flow_pipeline, numbered_steps, add_closing
+
+prs = build_presentation(          # Datum + Rechtseinheit IMMER setzen
+    datum="29. Mai 2026",          # ← vom User bestätigt
+    rechtseinheit="Galledia Fachmedien AG"  # ← vom User bestätigt
+)
+add_title(prs, "Titel", "Untertitel | Datum")
+add_section(prs, "01", "Ausgangslage")
+add_content(prs, "viel", "Kapiteltitel", "Headline", "Textkörper...", folio="3/12")
+kpi_grid(prs, [("96 GB","VRAM"), ("256 GB","RAM"), ("6 TB","NVMe")])
+two_column(prs, "Heute", bullets_l, "Ziel 2026", bullets_r, col2_red=True)
+flow_pipeline(prs, ["Netzlaufwerk","Parsing","Vektor-DB","Antwort"])
+numbered_steps(prs, [("Hardware","..."), ("Deployment","..."), ("Indizierung","...")])
+add_closing(prs)                    # Schlussfolie (rotes Layout, weisses Logo)
+prs.save("output.pptx")
 ```
 
-Beispiel numbered_agenda:
-```json
-{
-  "pattern": "numbered_agenda",
-  "title": "Agenda",
-  "slide_no": 2, "total": 12,
-  "context": "F&E AI-Hub Konzept",
-  "items": [
-    {"title": "Ausgangslage", "teaser": "Warum brauchen wir das?"},
-    {"title": "Kernprinzipien", "teaser": "Sicherheit, Modularitaet"}
-  ]
-}
-```
+**Farbrhythmus:** rote Zwischenfolien als Kapitel-Anker → helle Inhaltsfolien dazwischen.
+Nie zwei Zwischenfolien hintereinander, nie alle Folien gleich.
 
-Beispiel card_grid_3:
-```json
-{
-  "pattern": "card_grid_3",
-  "title": "Drei Kernprinzipien",
-  "slide_no": 4, "total": 12,
-  "cards": [
-    {"icon": "🛡", "title": "Datensicherheit", "bullets": ["...", "..."]},
-    {"icon": "⊜", "title": "Open Source", "bullets": ["..."]},
-    {"icon": "⚡", "title": "Modularitaet", "bullets": ["..."]}
-  ]
-}
-```
+---
 
-**Wann Patterns nutzen:** Kunden-Praesentationen, Pitch-Decks, Strategie-
-Vorstellungen, alles wo professionelle Optik zaehlt. Nicht fuer schnelle
-interne Stichwort-Folien.
+## Layout-Entscheidungstabelle (Vorlage_5)
 
-### Layout-Modus (klassisch, fuer einfache Inhalte)
-
-Setze `layout` statt `pattern` — die Folie nutzt eines der 16 Layouts aus
-der offiziellen Galledia-Vorlage. Einfacher, aber visuell sparsamer.
-
-## Verfuegbare Layouts
-
-| Key | Was | Wann verwenden |
+| Inhaltstyp | Layout-Name | Platzhalter |
 |---|---|---|
-| `title`, `title_red` | Titelfolie rot (Vollflaeche) | Eroeffnungsfolie |
-| `title_turquoise` | Titelfolie tuerkis | Variation |
-| `title_bronze`, `title_purple`, `title_lila` | Weitere Akzentfarben | Kapiteltitel |
-| `section`, `section_red` | Zwischenfolie rot | Kapiteltrenner |
-| `section_turquoise`, `section_bronze`, `section_purple`, `section_lila` | Andere Farben | |
-| `agenda` | 01_Agenda 5 | Inhaltsuebersicht |
-| `agenda_22` | 01_Agenda 22 | Alternative Agenda |
-| `content` | 04_vielText | **Standard fuer Inhaltsfolien mit Fliesstext und Bullets** |
-| `content_long` | 04_vielText | Alias zu content (gleicher Layout) |
-| `content_short`, `content_plakativ` | 02_wenigText | Plakative Kurz-Botschaften (3-5 Worte HUGE), z.B. „Einfach. Persoenlich. Wirkungsvoll." |
-| `default` | DEFAULT SLIDE | Generischer Inhalt |
-| `blank` | Leer | Custom-Inhalt |
+| Deck-Titel | `Titelfolie` | idx=0 Titel, idx=10 Untertitel |
+| Kapitel-Anker / Abschnitt | `2_Zwischenfolie rot` | keine — Textbox manuell |
+| Agenda wenig (≤5 Punkte) | `01_Agenda 5` | idx=0 Label, idx=11 leer, idx=13 Punkte, idx=14 Folio |
+| Agenda viel (6–12 Punkte) | `01_Agenda 22` | idx=0 Label, idx=11 leer, idx=13 Punkte, idx=14 Folio |
+| Grosse Aussage / Kernbotschaft | `02_wenigText` | idx=0 Kapiteltitel, idx=11 Headline 72pt, idx=13 Lead, idx=14 Folio, idx=15 Quelle |
+| Detail / Text / Struktur | `04_vielText` | idx=0 Kapiteltitel, idx=11 Headline, idx=13 Textkörper, idx=14 Folio, idx=15 Quelle |
+| KPI, Zweispalter, Pipeline, Timeline | `Leer` | idx=0/11/13 leer lassen, idx=14 Folio — Shapes via helpers.py |
+| Diskussion / Interaktion | `Abschlussfolie` | keine — zeigt Piktogramm + «Diskussion» |
+| Piktogramm-Referenz | `Piktogramme` | idx=0 Titel |
+| Schluss-/Abschlussfolie | `Schlussfolie` | keine — zeigt weisses Logo auf Rot |
 
-### Schritt 2 — JSON aufbauen
+**Hinweis `Leer`:** Im Bearbeitungsmodus zeigt das Layout leere Platzhalter-Rahmen
+(Bekanntes Problem aus Vorlage_5). In Render + Präsentation unsichtbar. Kein Blocker.
 
-```
-{
-  "organisation": "Galledia Fachmedien AG",
-  "slides": [
-    {"layout": "title", "title": "...", "subtitle": "..."},
-    {"layout": "agenda", "title": "Übersicht", "items": ["...", "..."]},
-    {"layout": "content", "title": "...", "content": "Zeile 1\nZeile 2\n· Bullet"},
-    {"layout": "section", "title": "Kapitel ..."}
-  ]
-}
-```
+---
 
-**Pro Folie:**
-- `layout` (Pflicht) — Key aus Tabelle oben
-- `title` — Folientitel (oder Topic-Ueberschrift bei Content-Folien)
-- `subtitle` — Untertitel bei Titelfolien / Section-Header bei Content-Folien
-- `content` — Hauptinhalt als String mit `\n` fuer Zeilenumbrueche
-- `items` — Alternative zu content als Array (z.B. Agenda)
+## CI-Farb-Tokens (aus Template-Theme — verbindlich)
 
-**Wichtig — Placeholder-Mapping pro Layout-Typ:**
-
-| Layout-Typ | `title` → | `subtitle` → | `content` → |
-|---|---|---|---|
-| `title` (Titelfolie) | grosser Hero-Titel | kleiner Untertitel oben | — |
-| `section` (Zwischenfolie) | Kapitel-Titel | — | — |
-| `content`/`agenda`/etc. | kleine Topic-Ueberschrift | mittlerer Section-Header | grosser Hauptinhaltsbereich |
-
-Beispiel Inhaltsfolie:
-```json
-{
-  "layout": "content",
-  "title": "Vision & Ziel",
-  "subtitle": "Ein KI-System, das mich kennt",
-  "content": "Aggregation aller Kanäle: E-Mail, WhatsApp, Dokumente\nVolltext- und Vektorsuche über 50 000+ Nachrichten\nAutomatische Klassifizierung und Antwortvorschläge"
-}
+```python
+# helpers.py exportiert diese als Konstanten
+RED   = RGBColor(0xE6, 0x1C, 0x52)   # Galledia-Rot  — Primärfarbe
+BLACK = RGBColor(0x00, 0x00, 0x00)   # Galledia-Schwarz
+WHITE = RGBColor(0xFF, 0xFF, 0xFF)
+G1    = RGBColor(0x40, 0x40, 0x40)   # Grau 1 (64/64/64)
+G2    = RGBColor(0x66, 0x66, 0x66)   # Grau 2 (102/102/102)
+G3    = RGBColor(0xA6, 0xA6, 0xA6)   # Grau 3
+G4    = RGBColor(0xD9, 0xD9, 0xD9)   # Grau 4
+GL    = RGBColor(0xF2, 0xF2, 0xF5)   # Hintergrundgrau (Karten)
+TURK  = RGBColor(0x22, 0xAA, 0x9F)   # Türkis — NUR Info-/Quote-Panels
 ```
 
-**Pflicht-Folien (werden automatisch eingefuegt falls fehlend):**
-- Titelfolie vorne — wenn erste Folie kein `title`-Layout, wird automatisch
-  eine vorangestellt
-- Agenda-Folie als Position 2 — generiert aus Titeln der Content-Folien
-- Schlussfolie hinten — Titelfolie rot mit „Vielen Dank / fuer Ihre Aufmerksamkeit"
+**Gewichtung:** dominant Rot/Schwarz/Grau. Türkis, Purple, Blau, Bronze NUR für Infografiken
+und Akzente — nie als Hauptfarbe.
 
-Deaktivierbar via `enforce_mandatory_slides: false`.
+---
 
-**Bullets:** Schreibe einfach jede Zeile fuer sich (mit `\n` getrennt) —
-PowerPoint setzt die Bullet-Glyphe automatisch ueber den Layout-Style.
-Wenn du `· ` oder `- ` am Zeilenanfang setzt, wird das vom Skript
-entfernt (sonst Doppel-Bullet).
+## CI-Schrift-Tokens
 
-**Layout-Wahl ist entscheidend fuer das Aussehen:**
-- Volltextfolien mit Bulletlisten oder Fliesstext → `content` (default)
-- Nur 3-5 Stichworte plakativ HUGE → `content_short`
-- Eine Agenda mit Aufzaehlung → `agenda`
-- Kapitel-Trennung → `section`
+| Verwendung | Font-Name |
+|---|---|
+| Plakative Titel / Headlines | `Volte Rounded Semibold` |
+| Fliesstext / Lead / Labels | `Volte` |
+| Zwischentitel / Hervorhebung | `Volte Semibold` |
+| Italic (Hervorhebung im Text) | `Volte` + italic=True |
 
-**Optional Top-Level:**
-- `replace_existing_slides` (Default `true`) — wenn `false` bleiben die
-  22 Vorlage-Beispielfolien drin und neue werden angehaengt
+Ausrichtung: **linksbündig** auf Inhaltsfolien. **Zentriert** nur auf Titelfolie/Cover.
+Body-Text grundsätzlich in Schwarz.
 
-### Schritt 3 — MCP-Tool aufrufen
+---
 
-`mcp__galledia-office__generate_galledia_praesentation` mit dem JSON.
+## CI-Mikroregeln (verbindlich)
 
-Returns: `{filename, mimetype, download_url, size_bytes,
-expires_in_seconds, report, validation_errors}`.
+- **Logo:** nur Rot, Weiss oder Schwarz. Nie mit Box/Umform auf Bildern. Nie verzerren.
+  Schutzzone wahren. Unter 8 mm Breite → nur Bildmarke (G), ohne Schriftzug.
+  **Farbwahl:** Rot-Logo auf weissem/hellem Hintergrund · Weiss-Logo auf rotem/dunklem Hintergrund · Schwarz-Logo auf hellem Hintergrund (alternative zu Rot).
+  **Skill-Funktion:** `add_logo(slide, variant='rot')` bzw. `variant='weiss'` — platziert Bildmarke rechts unten.
+- **Bullets:** Aufzählungszeichen `•` (Punkt). Zitate in Guillemets `« »`. Separator `|`.
+- **Formen:** Kästen und Linien immer mit abgerundeten Ecken (Motiv konsistent).
+- **Bildwelt:** authentische Menschen «wie du und ich», warmes weiches Licht, erdige Töne,
+  partielle Highlights in Galledia-Rot. Keine offensichtlichen Stock-Models.
+- **Piktogramme:** plakativ (gross/dominant) oder informativ (klein). In Schwarz/Weiss/Rot
+  oder Akzentfarbe. Piktogramme NICHT mit dem Galledia-Alphabet mischen.
+- **Fusszeile (idx=14):** Format `«n / total»` z.B. `«3 / 12»`. Auf Titelfolie und
+  Schlussfolie weglassen.
+- **Quellenangabe (idx=15):** nur setzen wenn Quellen vorhanden. Format:
+  `Quelle: [Quelle 1] / [Quelle 2, Jahr]`.
 
-### Schritt 4 — Link dem User praesentieren
+---
 
-**WICHTIG: Versuche NIE selbst, die `download_url` per HTTP/curl/web_fetch
-herunterzuladen.** Praesentiere die URL als Markdown-Link mit dem
-`filename` als sichtbarem Text:
+## Anti-Bleiwüste (Pflichtprüfung pro Folie)
 
-```markdown
-Hier ist deine Praesentation: [Praesentation_Kunde_X.pptx](https://office-mcp.epimetheus.uk/files/...)
+- Jede Folie hat ≥1 visuelles Element (Bild, Piktogramm, grosse Zahl, Diagramm, Farbfläche).
+- Max. 6 Zeilen / 3 Bullets pro Folie — sonst splitten.
+- Kennzahlen als KPI-Callout (Zahl 52–72 pt, Label klein darunter) statt im Fliesstext.
+- Vergleich/Prozess/Timeline als Shapes statt als Bullet-Liste.
+- Roter Farbrhythmus einhalten (mindestens jede 3.–4. Folie ein Rot-Anker).
+- KEINE Akzentlinien unter Titeln. KEINE dekorativen Vollbalken. Vollflächige rote
+  Cover/Zwischenfolien sind dagegen CI-Signatur und ausdrücklich erwünscht.
+
+---
+
+## Quellenangabe und Fusszeile setzen
+
+```python
+# In native Layouts (04_vielText, 02_wenigText):
+ph[14].text = "«5 / 12»"                                        # Folienzahl
+ph[15].text = "Quelle: Gartner 2025 / Schätzung Galledia F&E"  # optional
+
+# Auf Leer (via helpers.add_footer):
+add_footer(slide, folio="5 / 12", source="Gartner 2025")
 ```
 
-Liste kurz die generierten Folien stichwortartig auf (Layout + Titel)
-damit der User sieht, was drin ist. Antworte sachlich.
+---
 
-## CI-Regeln
+## QA (verbindlich vor Abgabe)
 
-- `organisation` muss eine der 5 OE sein (siehe `references/schreibweisen.md`)
-- Keine "Galledia AG", "Galledia Gruppe", "Fax" im Text
-- Keine geraden Anfuehrungszeichen — `« »` verwenden
+```bash
+python scripts/office/soffice.py --headless --convert-to pdf output.pptx
+rm -f slide-*.jpg && pdftoppm -jpeg -r 120 output.pdf slide
+```
 
-## V1-Limitationen
+Subagent-Inspektion: Textüberlauf, Kontrast, Überlappung, Schriftsubstitution, Platzhalter-Reste.
 
-- Nur Text-Inhalte. Bilder, Tabellen, Diagramme: in PowerPoint manuell
-  einfuegen
-- `[[MasterProperty(...)]]`-Platzhalter aus der Original-Vorlage werden
-  automatisch durch `organisation` ersetzt
+```bash
+extract-text output.pptx | grep -iE "xxx|lorem|Mastertitel|Kapiteltitel 30pt|Themenpunkt"
+```
 
-## Was NICHT in diesem Skill
+---
 
-- Brief → `galledia-brief`
-- Kurzbrief → `galledia-kurzbrief`
+## Erweiterung: Word-Vorlagen (Phase 2)
+
+Brief, Kurzbrief und Dokument folgen in einer zweiten Skill-Sektion (`## Word-Vorlagen`).
+Selbe CI-Tokens, selbe Fonts, python-docx als Builder. Sobald Word-Templates geliefert werden.

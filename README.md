@@ -1,128 +1,92 @@
 # Galledia Office CI Plugin
 
-Claude Code Plugin für CI/CD-konforme Office-Dokumente der Galledia-Gruppe.
+Claude-Plugin für CI/CD-konforme Office-Dokumente der Galledia-Gruppe.
 
-**Aktueller Stand (V0.3):** Drei Skills + MCP-Server:
-- `galledia-brief` — Geschäftsbrief (.docx)
-- `galledia-kurzbrief` — Kurzbrief mit 10 Notizoptionen (.docx)
-- `galledia-praesentation` — PowerPoint mit 16 Layouts (.pptx)
-- MCP-Server `galledia-office-mcp` ([Repo](https://github.com/galledia-ag/office-ci-mcp)) — generiert die Dokumente, sodass die Skills in **Cowork (Web + Desktop)** und Claude Code funktionieren — ohne Abhängigkeit von der claude.ai-Sandbox-VM.
+**v1.0.0** — Hybride Architektur:
+- `galledia-praesentation` — PowerPoint (**Code Execution**, Vorlage_5 + Volte + Logos)
+- `galledia-brief` — Geschäftsbrief (.docx, MCP `galledia-office`)
+- `galledia-kurzbrief` — Kurzbrief (.docx, MCP `galledia-office`)
+- `galledia-dokument` — Dokument für Offerten/Schulungen (.docx)
 
-Alle auf Basis der offiziellen Galledia-Vorlagen gemäss Markenhandbuch v1.5.
+## Verwendung
 
-## Was macht das Plugin
-
-Wenn ein:e Mitarbeiter:in in Claude Code schreibt:
-
-> *Erstelle einen Brief an die Müller AG wegen unserer Inserate-Offerte für 2026*
-
-dann erkennt der **`galledia-brief`**-Skill die Anfrage, sammelt die nötigen Daten (Empfänger, Betreff, Inhalt), prüft sie gegen die Galledia-CI-Regeln (Schreibweise „Galledia Fachmedien AG" etc., Telefonformat, Bullets `·`, Guillemets `« »`) und liefert eine fertige `.docx` — fertig zum Versand.
-
-Die Vorlage wird **nicht** verändert; nur ihre Platzhalter (Word Content Controls + Bookmarks) werden befüllt. Layout, Logo, Volte-Schrift, Schutzzone, Adresszeile kommen alle automatisch aus der `.dotx`.
-
-## Installation für Mitarbeitende
-
-Voraussetzung: Claude Code installiert, Python 3.10+ verfügbar.
-
-```bash
-# 1. Plugin-Marketplace hinzufügen (einmalig pro MA)
-/plugin marketplace add <git-enterprise-url>/galledia-office-ci
-
-# 2. Plugin aktivieren
-/plugin install galledia-office-ci
-
-# 3. Python-Abhängigkeit (einmalig)
-python -m pip install lxml
+```
+/praesentation Erstelle eine Präsentation zu unserem KI-Hub-Projekt
+/brief         Schreibe einen Brief an Kunde XY wegen...
+/kurzbrief     Kurzmitteilung an...
 ```
 
-Ab dann steht der `galledia-brief`-Skill automatisch zur Verfügung — keine weitere Konfiguration nötig.
+Oder natürliche Sprache — der passende Skill erkennt die Anfrage automatisch.
 
-## Repo-Struktur
+## Architektur
 
 ```
 galledia-office-ci/
-├── .claude-plugin/plugin.json
+├── .claude-plugin/
+│   ├── plugin.json          ← Skill-Bundle-Manifest
+│   └── marketplace.json     ← Org-Marketplace-Konfiguration
+├── .mcp.json                ← MCP brief/kurzbrief (epimetheus.uk)
+├── commands/                ← Slash-Commands /praesentation /brief etc.
 ├── skills/
-│   └── galledia-brief/
-│       ├── SKILL.md                        ← Skill-Definition + CI-Regeln
-│       ├── references/
-│       │   ├── schreibweisen.md            ← 5 OE, Telefon, Sonderzeichen
-│       │   ├── adressbloecke.md            ← Standorte (Flawil, ZH, FF, LU, …)
-│       │   └── markenhandbuch_kurzfassung.md
-│       ├── templates/
-│       │   └── Brief-Vorlage Galledia.dotx ← Offizielle Word-Vorlage
-│       └── scripts/
-│           ├── fill_brief.py               ← Python-Befüller
-│           ├── example_input.json          ← Beispiel-Eingabe
-│           └── README.md                   ← Skript-API-Doku
-├── test/                                   ← Test-Outputs (in .gitignore)
-└── README.md (diese Datei)
+│   ├── galledia-praesentation/
+│   │   ├── SKILL.md         ← Instruktionen + CI-Regeln
+│   │   ├── helpers.py       ← python-pptx Builder-Library
+│   │   ├── assets/
+│   │   │   ├── Vorlage_5.pptx      ← Galledia-Template (10 Layouts)
+│   │   │   ├── fonts/              ← Volte-Familie (5 OTF)
+│   │   │   └── logo/               ← Logos rot/weiss/schwarz (6 PNG)
+│   │   └── references/      ← Markenhandbuch, Schreibweisen, Adressen
+│   ├── galledia-brief/      ← Word-Brief (MCP-basiert)
+│   ├── galledia-kurzbrief/  ← Word-Kurzbrief (MCP-basiert)
+│   └── galledia-dokument/   ← Word-Dokument (in Entwicklung)
+└── docs/
+    └── DOCKER_CLEANUP.md    ← Roadmap MCP-Ablösung
 ```
 
-## CI/CD-Regeln (durchgesetzt)
+## Präsentation — verfügbare Layouts (Vorlage_5)
 
-| Regel | Umsetzung |
+| Layout | Typ |
 |---|---|
-| **5 Organisationseinheiten** | `galledia group ag` (klein!), `Galledia Fachmedien AG`, `Galledia Regionalmedien AG`, `Galledia Print AG`, `Galledia Digital AG` — alles andere führt zu Validierungsfehler |
-| **Telefonformat** | `T +41 58 344 96 22` / `M +41 79 XXX XX XX` — Regex-validiert |
-| **Bullets** | `·` (Mittelpunkt), nicht `-` oder `•` |
-| **Anführungszeichen** | `« »` (Guillemets), nicht `"` |
-| **Fax** | Verboten — Validierung weist ab |
-| **Volte-Schrift** | Aus Vorlage, automatisch (auf allen MA-Geräten installiert) |
-| **Logo, Adresszeile, Schutzzone** | Kommen direkt aus der `.dotx` |
+| Titelfolie | Rote Vollflächige, Galledia-Logo |
+| Zwischenfolie | Kapitel-Anker in Rot |
+| 01_Agenda 5 / 01_Agenda 22 | 5 oder 6–12 Punkte |
+| 02_wenigText | Kernbotschaft plakativ |
+| 04_vielText | Strukturierter Inhalt + Quellenangabe |
+| Leer | Freie Komposition (KPI, Zweispalter, Pipeline, Timeline) |
+| Abschlussfolie | Diskussions-Folie mit Piktogramm |
+| Schlussfolie | Rot, weisses Galledia-Logo |
+
+## Deployment (Org-Marketplace)
+
+**Organization settings → Cowork → Plugin-Marketplace → Git-Repo:**
+```
+https://github.com/galledia-ag/galledia-office-ci
+Branch: main
+```
+
+Nach jedem `git push main` → Marketplace synct automatisch (bis 30 Min).
 
 ## Vorlagen aktualisieren
 
-Wenn das Markenhandbuch sich ändert (z.B. neue OE, neue Standort-Adresse):
-
-1. Pull Request gegen dieses Repo öffnen
-2. `templates/Brief-Vorlage Galledia.dotx` ersetzen (von Designer:in bereitgestellt) und/oder `references/*.md` anpassen
-3. Version in `.claude-plugin/plugin.json` bumpen (semver)
-4. PR mergen → MA bekommen Update via `/plugin update` (oder automatisch beim nächsten Start)
-
-Es gibt aktuell keinen dedizierten Brand-Guard — Template-Pflege läuft über die normale Entwicklungs-Pipeline.
+| Asset | Pfad | Lieferant |
+|---|---|---|
+| PowerPoint-Vorlage | `skills/galledia-praesentation/assets/Vorlage_5.pptx` | Designer (Prepress Flawil) |
+| Volte-Fonts | `skills/galledia-praesentation/assets/fonts/` | Brand-Guard |
+| Logos | `skills/galledia-praesentation/assets/logo/` | M:\\\_organisation\\20_logos |
+| Word-Briefvorlage | `skills/galledia-brief/` | Designer |
 
 ## Roadmap
 
 | Version | Inhalt | Status |
 |---|---|---|
-| V0.1 | Brief (`.docx`) | ✅ Fertig |
-| V0.1.2 | Encoding-Robustheit (UTF-8/BOM/cp1252/Mojibake-Auto-Repair) | ✅ Fertig |
-| V0.2 | Kurzbrief (`.docx`) + Präsentation (`.pptx`) | ✅ Fertig |
-| V0.3 | MCP-Server für Cowork-Kompatibilität (kein Sandbox-VM mehr nötig) | ✅ Fertig |
-| V0.4 | Skill-Bundles für Marketing-/Sales-Templates | geplant |
+| v0.1–v0.3 | Brief, Kurzbrief (MCP) | ✅ |
+| **v1.0.0** | **Präsentation → Code Execution (Vorlage_5 + Volte + Logos)** | **✅ aktuell** |
+| v1.1.0 | Word-Skills Brief + Kurzbrief als Code Execution | geplant |
+| v1.2.0 | Dokument-Skill | geplant |
+| v1.3.0 | MCP vollständig abgelöst, Docker-Cleanup | geplant |
 
-## Technischer Hintergrund
-
-Die Galledia-Vorlagen nutzen ein officeatwork-Setup mit:
-- **Content Controls** (`<w:sdt>`) mit `w:tag`-Identifikation (z.B. `AdressBlock`, `RecipientAddress`)
-- **Data Binding** auf `customXml/item4.xml` (officeatwork CustomXMLPart) — dort liegen die effektiven Werte
-- **Bookmarks** für freie Textbereiche (`Subject`, `Text`)
-
-Das `fill_brief.py`-Skript:
-1. Validiert die Eingabe gegen Galledia-CI-Regeln
-2. Liest die `.dotx` als ZIP-Archiv ein (kein `python-docx` — das beschädigt die Vorlagen-Struktur)
-3. Aktualisiert `customXml/item4.xml` (autoritative Datenquelle für Word)
-4. Aktualisiert die SDT-Inline-Content (Cache + Fallback)
-5. Aktualisiert Bookmark-Bereiche (`Subject`, `Text`)
-6. Patcht `[Content_Types].xml` (`template.main+xml` → `document.main+xml`)
-7. Schreibt als `.docx` raus
-
-## Test
-
-Test-Brief generieren:
-
-```powershell
-python skills/galledia-brief/scripts/fill_brief.py `
-  --input skills/galledia-brief/scripts/example_input.json `
-  --output test/Testbrief.docx
-```
-
-## Quellen
-
-- Galledia Markenhandbuch v1.5 (7.6.2021)
-- Brief-Vorlage Galledia.dotx (offizielle Word-Vorlage)
+Detaillierter MCP-Ablöseplan: `docs/DOCKER_CLEANUP.md`
 
 ## Kontakt
 
-Bei Fragen zur Verwendung oder bei CI-Verstössen, die der Skill nicht erkennt: Issue im Repo eröffnen.
+Fragen zur CI oder Template-Updates: stefan.zimmermann@galledia.ch

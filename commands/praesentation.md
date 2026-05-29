@@ -1,24 +1,22 @@
 ---
-description: Generiere eine Galledia-PowerPoint-Praesentation im CI/CD
-allowed-tools: ["mcp__galledia-office__generate_galledia_praesentation"]
+description: Galledia-Präsentation im CI/CD erstellen (Vorlage_5, Code Execution)
+allowed-tools: ["Code Execution"]
 ---
 
-Aktiviere den `galledia-praesentation`-Skill und erstelle eine
-PowerPoint-Praesentation (.pptx) mit Galledia-Layouts in CI-Farben
-(Rot/Tuerkis/Bronze/Purple/Lila), Volte-Schrift und Galledia-G als
-Watermark.
+Aktiviere den `galledia-praesentation`-Skill und erstelle eine CI/CD-konforme
+PowerPoint-Präsentation (.pptx) mit Vorlage_5, Volte-Schrift und Galledia-Logos.
 
-Falls der User in `$ARGUMENTS` schon Folien-Struktur mitgegeben hat,
-uebernimm sie. Sonst frage nach:
-- Anzahl/Reihenfolge der Folien
-- Titel + Inhalt je Folie
-- Welches Layout je Folie (title / agenda / content / section / etc.)
+**Pflichtabfrage vor dem Start:**
+- Datum der Präsentation (für Fusszeile, z.B. «29. Mai 2026»)
+- Rechtseinheit (z.B. «Galledia Fachmedien AG»)
+- Präsentationsinhalt / Storyline (wenn nicht in $ARGUMENTS)
 
-Verfuegbare Layouts: title (rot/tuerkis/bronze/purple/lila), section
-(gleiche Farb-Varianten), agenda, content, content_long, default, blank.
+Verwende `helpers.py` und die Funktionen aus dem Skill:
+`build_presentation()`, `add_title()`, `add_agenda()`, `add_content()`,
+`kpi_grid()`, `two_column()`, `flow_pipeline()`, `numbered_steps()`,
+`timeline()`, `add_closing()` — nie direkt MCP aufrufen.
 
-Rufe `mcp__galledia-office__generate_galledia_praesentation` auf, dem
-User den `download_url` als Markdown-Link praesentieren. Liste die
-generierten Folien kurz stichwortartig auf.
+Fusszeile immer setzen: `build_presentation(datum=..., rechtseinheit=...)`.
+Keine Versalien. Keine Folienübergänge. Kein Volte Rounded in generiertem Text.
 
 User-Input: $ARGUMENTS

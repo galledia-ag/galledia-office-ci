@@ -51,6 +51,244 @@ Lieber 8 klare Folien als 4 volle. Whitespace ist Teil des Designs.
 
 ---
 
+## Inhalt zuerst — die wichtigste Regel
+
+Eine Präsentation ist nur so gut wie ihr Inhalt. Reihenfolge der Inhaltsquellen:
+
+**1. Aktueller Gesprächs-/Projektkontext (höchste Priorität)**
+Wenn der Nutzer um eine **Zusammenfassung dieses Projekts / Gesprächs** bittet, ist der Inhalt bereits da — im aktuellen Gespräch und im Projekt-Wissen. Diesen TATSÄCHLICHEN Inhalt zusammenfassen:
+- Konkrete Entscheidungen, Schritte, Resultate, Versionen, Zahlen aus dem Gespräch
+- Was wurde gebaut, was wurde gelöst, was sind die nächsten Schritte
+- **Niemals auf generische Aussagen abstrahieren, wenn die Spezifika vor dir liegen.** Eine «Zusammenfassung» die den realen Inhalt durch Wikipedia-Bullets ersetzt, ist ein Totalausfall.
+
+**2. Chat-Historie durchsuchen (`conversation_search`)**
+Bei Galledia-internen Themen, die nicht im aktuellen Gespräch stehen (Jenny, ASMIQ, Digital Twin, n8n, m&k, Press-Release-Pipeline, Archiv): zuerst suchen — echte Zahlen, Architektur, Status, Namen sammeln.
+
+**3. Pflichtabfrage**
+Nur wenn Kontext und Historie nichts liefern oder das Thema extern ist.
+
+
+## Pflichtabfrage
+
+- **Dokumenttitel** (z.B. «KI-Hub Offerte»)
+- **Untertitel / Anlass** (z.B. «Angebot für XY AG»)
+- **Datum** mit Ort (z.B. «Stäfa, 29. Mai 2026»)
+- **Rechtseinheit** (z.B. «Galledia Fachmedien AG»)
+- **Adresse** (z.B. «Seestrasse 90a\n8712 Stäfa»)
+- **Struktur** — Kapitel und Inhalte (wenn unklar: erst Gliederung vorschlagen)
+
+## Setup
+
+```bash
+pip install python-docx --break-system-packages
+```
+
+```python
+import os, sys, urllib.request
+_DIR = "/tmp/galledia_dokument"
+os.makedirs(f"{_DIR}/assets", exist_ok=True)
+sys.path.insert(0, _DIR)
+_BASE = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-dokument"
+for _name, _url in [
+    ("fill_dokument.py",             "fill_dokument.py"),
+    ("assets/Vorlage_Dokument.dotx", "assets/Vorlage_Dokument.dotx"),
+]:
+    _dest = f"{_DIR}/{_name}"
+    if not os.path.exists(_dest):
+        urllib.request.urlretrieve(f"{_BASE}/{_url}", _dest)
+        print(f"✓ {_name} ({os.path.getsize(_dest):,} bytes)")
+
+from fill_dokument import build_document
+```
+
+## Verwendung
+
+```python
+build_document(
+    titel         = "KI-Hub Offerte",
+    untertitel    = "Angebot AI-Infrastruktur",
+    datum         = "Stäfa, 29. Mai 2026",
+    rechtseinheit = "Galledia Fachmedien AG",
+    adresse       = "Seestrasse 90a\n8712 Stäfa",       # \n = Zeilenumbruch
+    empfaenger    = "XY AG\nz.H. Herr Max Muster\nCH-8000 Zürich",  # optional
+    abschnitte    = [
+        {
+            "titel": "Ausgangslage",
+            "inhalt": [
+                {"typ": "text",    "inhalt": "Fliesstext..."},
+                {"typ": "bullet",  "inhalt": "Aufzählungspunkt"},
+                {"typ": "h2",      "inhalt": "Unterkapitel"},
+                {"typ": "h3",      "inhalt": "Abschnitt"},
+                {"typ": "tabelle", "inhalt": [
+                    ["Spalte A", "Spalte B"],   # Kopfzeile (schwarz, F2F2F5)
+                    ["Wert 1",   "Wert 2"],
+                ]},
+            ]
+        },
+    ],
+    output_path = "output.docx",
+)
+```
+
+## Aufbau: Deckblatt → TOC (eigene Seite) → Inhalt
+
+Ort/Datum und Rechtseinheit nur auf dem Deckblatt — nicht am Schluss wiederholen.
+TOC: in Word mit F9 aktualisieren.
+
+---
+
+# 4. Präsentation
+
+CI-konforme PowerPoint (.pptx) via Code Execution (`helpers.py` + `Vorlage_5.pptx`).
+
+## Inhalt zuerst — die wichtigste Regel
+
+Eine Präsentation ist nur so gut wie ihr Inhalt. Reihenfolge der Inhaltsquellen:
+
+**1. Aktueller Gesprächs-/Projektkontext (höchste Priorität)**
+Wenn der Nutzer um eine **Zusammenfassung dieses Projekts / Gesprächs** bittet, ist der Inhalt bereits da — im aktuellen Gespräch und im Projekt-Wissen. Diesen TATSÄCHLICHEN Inhalt zusammenfassen:
+- Konkrete Entscheidungen, Schritte, Resultate, Versionen, Zahlen aus dem Gespräch
+- Was wurde gebaut, was wurde gelöst, was sind die nächsten Schritte
+- **Niemals auf generische Aussagen abstrahieren, wenn die Spezifika vor dir liegen.** Eine «Zusammenfassung» die den realen Inhalt durch Wikipedia-Bullets ersetzt, ist ein Totalausfall.
+
+**2. Chat-Historie durchsuchen (`conversation_search`)**
+Bei Galledia-internen Themen, die nicht im aktuellen Gespräch stehen (Jenny, ASMIQ, Digital Twin, n8n, m&k, Press-Release-Pipeline, Archiv): zuerst suchen — echte Zahlen, Architektur, Status, Namen sammeln.
+
+**3. Pflichtabfrage**
+Nur wenn Kontext und Historie nichts liefern oder das Thema extern ist.
+
+## Pflichtabfrage — IMMER vor dem Bauen
+
+Bevor Code geschrieben wird, diese Fragen stellen — ausser sie sind bereits beantwortet oder aus der Historie bekannt:
+
+1. **Datum + Rechtseinheit** (Fusszeile)
+2. **Kernbotschaft** — Was soll die Zielgruppe nach der Präsentation denken/tun/entscheiden?
+3. **3 wichtigste Fakten/Zahlen** — Konkrete Daten, keine Meinungen
+4. **Zielgruppe** — GL, Kunde, Team, Investor?
+5. **Storyline** — Grober Aufbau (Problem → Lösung → Nächste Schritte?)
+
+Wenn der Nutzer sagt «mir egal», «nur ein Test», «füll selbst» → akzeptieren, plausiblen Inhalt zum Thema erfinden, aber dennoch Qualitätsprinzipien anwenden.
+
+
+## Qualitätsprinzipien (verbindlich)
+
+Claude leitet den Nutzer zu professionellen, aussagekräftigen Folien — nicht zu formatierten Aufzählungen.
+
+**Pyramid Principle — jede Folie hat eine Hauptaussage:**
+```
+❌ Titel: «KI-Anwendungen»  (Thema, keine Aussage)
+✅ Titel: «KI spart 3'900 Stunden pro Monat»  (Aussage mit Beweis)
+```
+
+**Zahlen statt Adjektive:**
+```
+❌ «Signifikante Effizienzsteigerung»
+✅ «39% weniger manuelle Arbeit — 3'900h/Monat»
+```
+
+**Visuelle Beweise statt Bullet-Listen:**
+```
+❌ 5 Bullets zu «Vorteilen von KI»  → add_content("viel")
+✅ 3 KPI-Callouts mit konkreten Zahlen  → kpi_grid()
+✅ Vorher/Nachher-Vergleich  → two_column()
+✅ Prozess in 4 Schritten  → flow_pipeline()
+```
+
+**Eine Aussage pro Folie — nie mehr als 3 Bullets:**
+```
+❌ 6 Bullets auf einer Inhaltsfolie
+✅ 3 Bullets max — oder aufteilen auf 2 Folien
+```
+
+**Roter Faden — typische Struktur:**
+```
+Folie 1: Titel (Thema + Kernbotschaft im Untertitel)
+Folie 2: Agenda
+Folie 3: Ausgangslage / Problem (mit Zahl oder Fakt)
+Folie 4: Lösung / Kernaussage (visuell — KPI, Pipeline, Zweispalter)
+Folie 5: Beweis / Ergebnis (Zahlen, Vergleich)
+Folie 6: Nächste Schritte (nummerierte Schritte)
+Folie 7: Schlussfolie
+```
+
+## Setup
+
+```bash
+pip install python-pptx Pillow --break-system-packages
+```
+
+```python
+# Assets von GitHub laden (Verzeichnisstruktur für helpers.py erhalten)
+import os, sys, urllib.request
+_DIR = "/tmp/galledia_praesentation"
+os.makedirs(f"{_DIR}/assets/logo", exist_ok=True)
+sys.path.insert(0, _DIR)
+_BASE = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-praesentation"
+for _name, _url in [
+    ("helpers.py",                   "helpers.py"),
+    ("assets/Vorlage_5.pptx",        "assets/Vorlage_5.pptx"),
+    ("assets/logo/logo_rot.png",     "assets/logo/logo_rot.png"),
+    ("assets/logo/logo_weiss.png",   "assets/logo/logo_weiss.png"),
+    ("assets/logo/logo_schwarz.png", "assets/logo/logo_schwarz.png"),
+]:
+    _dest = f"{_DIR}/{_name}"
+    if not os.path.exists(_dest):
+        urllib.request.urlretrieve(f"{_BASE}/{_url}", _dest)
+        print(f"✓ {_name} ({os.path.getsize(_dest):,} bytes)")
+
+from helpers import (build_presentation, add_title, add_section, add_agenda,
+                     add_content, add_closing, add_discussion,
+                     kpi_grid, two_column, flow_pipeline, numbered_steps, timeline)
+```
+
+
+## Pflichtregeln — Häufige Fehler
+
+**add_agenda():**
+```python
+# ❌ FALSCH — 2 Zeilen pro Punkt, Teaser verboten
+add_agenda(prs, ["KI-Anwendungen
+Status und Hintergrund", "Roadmap
+Massnahmen"])
+# ✅ RICHTIG — 1 Zeile pro Punkt, kein Zusatz
+add_agenda(prs, ["KI-Anwendungen", "Roadmap", "Nächste Schritte"], folio="2")
+```
+
+**add_content() — Kapiteltitel:**
+```python
+# ❌ FALSCH — Zahlen als Kapiteltitel
+add_content(prs, "viel", "01", "Headline", "Text", folio="3")
+# ✅ RICHTIG — beschreibendes Wort
+add_content(prs, "viel", "KI-Trends", "Headline max. 35 Zeichen", "Text", folio="3")
+```
+
+**kpi_grid() / two_column() / flow_pipeline() — kicker + headline PFLICHT:**
+```python
+# ❌ FALSCH — kicker und headline fehlen → leerer Seitenkopf
+two_column(prs, "Heute", items_l, "Ziel", items_r, folio="4")
+# ✅ RICHTIG
+two_column(prs, "Heute", items_l, "Ziel 2026", items_r,
+           kicker="Transformation", headline="Heute vs. Ziel 2026",
+           col2_red=True, folio="4")
+
+# ❌ FALSCH
+kpi_grid(prs, [("96 GB","VRAM")], folio="3")
+# ✅ RICHTIG
+kpi_grid(prs, [("96 GB","VRAM"), ("256 GB","RAM"), ("6 TB","NVMe")],
+         kicker="Hardware", headline="R&D AI-Workhorse", folio="3")
+```
+
+**Headline-Länge:**
+```python
+# ❌ FALSCH — zu lang, läuft über
+add_content(prs, "viel", "KI-Trends", "KI in der Redaktion und Vermarktung 2026", ...)
+# ✅ RICHTIG — max. 35 Zeichen
+add_content(prs, "viel", "KI-Trends", "KI in Redaktion und Sales", ...)
+```
+
+
+---
+
 ## Workflow (4 Schritte)
 
 **Pflicht vor dem ersten `build_presentation()`-Aufruf:**

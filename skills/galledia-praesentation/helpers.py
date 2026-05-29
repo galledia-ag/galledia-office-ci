@@ -1,5 +1,5 @@
 """
-helpers.py — Galledia Präsentations-Skill v1.2
+helpers.py — Galledia Präsentations-Skill v1.3 (adaptive Headlines + adaptive Karten)
 Schrift-Regel: Volte (Fliesstext/Kapiteltitel), Volte Semibold (Headlines/Hervorhebungen)
 Keine Versalien. Kein Volte Rounded in generiertem Inhalt.
 """
@@ -124,6 +124,26 @@ def run(para, text, size, font, color,
     r.font.color.rgb=color; r.font.bold=bold; r.font.italic=italic
     return para
 
+def _headline_size(text):
+    """Adaptive Headline-Grösse — verhindert Überlauf in den Body bei langen Headlines."""
+    n = len(text or "")
+    if n <= 28: return 72
+    if n <= 38: return 54
+    if n <= 50: return 44
+    if n <= 64: return 36
+    return 30
+
+def _enable_shrink(tf):
+    """Aktiviert 'Text bei Überlauf verkleinern' (normAutofit) auf einem Textframe."""
+    from lxml import etree
+    bodyPr = tf._txBody.find(qn('a:bodyPr'))
+    if bodyPr is None:
+        bodyPr = etree.SubElement(tf._txBody, qn('a:bodyPr'))
+    for tag in ('a:spAutoFit','a:noAutofit','a:normAutofit'):
+        e = bodyPr.find(qn(tag))
+        if e is not None: bodyPr.remove(e)
+    etree.SubElement(bodyPr, qn('a:normAutofit'))
+
 def card(slide, x, y, w, h, fill, corner=0.06):
     sh=slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,x,y,w,h)
     sh.fill.solid(); sh.fill.fore_color.rgb=fill
@@ -156,10 +176,10 @@ def _set_header(slide, kicker, headline):
         run(tf.paragraphs[0], kicker, 30, BODY, BLACK, space_after=0)
     if headline:
         if 11 in ph:
-            run(ph[11].text_frame.paragraphs[0], headline, 72, SB, BLACK, space_after=0)
+            run(ph[11].text_frame.paragraphs[0], headline, _headline_size(headline), SB, BLACK, space_after=0); _enable_shrink(ph[11].text_frame)
         else:
             tf=tb(slide,GX,GY_H,GW,Inches(1.15))
-            run(tf.paragraphs[0], headline, 72, SB, BLACK, space_after=0)
+            run(tf.paragraphs[0], headline, _headline_size(headline), SB, BLACK, space_after=0)
     if 13 in ph and not ph[13].text_frame.text:
         ph[13].text=""   # Prompt-Text unterdrücken
 
@@ -233,7 +253,11 @@ def add_agenda(prs, items, variant="agenda5", folio=""):
 def add_content(prs, variant, kapitel, headline, body_text, folio="", source=""):
     """Inhaltsfolie. variant='viel' oder 'wenig'."""
     s=prs.slides.add_slide(_lay(prs,variant)); ph=_phs(s)
-    ph[0].text=kapitel; ph[11].text=headline; ph[13].text=body_text
+    ph[0].text=kapitel
+    run(ph[11].text_frame.paragraphs[0], headline, _headline_size(headline), SB, BLACK, space_after=0)
+    _enable_shrink(ph[11].text_frame)
+    ph[13].text=body_text
+    _enable_shrink(ph[13].text_frame)
     if 14 in ph: run(ph[14].text_frame.paragraphs[0],
                      _footer_str(prs,folio),11,BODY,BLACK,space_after=0)
     if source and 15 in ph: ph[15].text=f"Quelle: {source}"
@@ -270,7 +294,10 @@ def two_column(prs,head_l,items_l,head_r,items_r,
                col2_red=True,kicker="",headline="",folio="",source=""):
     s=_blank(prs)
     if kicker or headline: _set_header(s,kicker,headline)
-    cy,ch=Inches(3.2),Inches(6.8); cw=(GW-Inches(0.6))/2
+    # Kartenhöhe an Inhalt anpassen (Header + Bullets), beide Karten gleich hoch
+    rows=max(len(items_l),len(items_r))
+    ch=Inches(min(6.8, max(2.4, 1.5 + 0.62*rows)))
+    cy=Inches(3.2); cw=(GW-Inches(0.6))/2
     for x,fill,head,fg,items in [
         (GX, GL, head_l, G1, items_l),
         (GX+cw+Inches(0.6), RED if col2_red else GL,

@@ -80,9 +80,10 @@ Nach jedem `git push main` → Marketplace synct automatisch (bis 30 Min).
 | Version | Inhalt | Status |
 |---|---|---|
 | v0.1–v0.3 | Brief, Kurzbrief (MCP) | ✅ |
-| **v1.0.0** | **Präsentation → Code Execution (Vorlage_5 + Volte + Logos)** | **✅ aktuell** |
-| v1.1.0 | Word-Skills Brief + Kurzbrief als Code Execution | geplant |
-| v1.2.0 | Dokument-Skill | geplant |
+| v1.0.0 | Präsentation → Code Execution (Vorlage_5 + Volte + Logos) | abgelöst |
+| v1.1.x | Dokument-Skill, kombinierter Chat-Skill, Adressen, MCP-Bereinigung | abgelöst |
+| **v1.2.0** | **Adaptive Layouts (Headlines + Karten), Inhalts-Priorisierung, Qualitätsprinzipien** | **✅ aktuell** |
+| v1.3.0 | Brief + Kurzbrief auf Code Execution (MCP-Ablösung) | geplant |
 | v1.3.0 | MCP vollständig abgelöst, Docker-Cleanup | geplant |
 
 Detaillierter MCP-Ablöseplan: `docs/DOCKER_CLEANUP.md`

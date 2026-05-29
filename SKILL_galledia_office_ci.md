@@ -7,7 +7,7 @@ description: >
   Dokument (.docx mehrseitig) → «Offerte», «Angebot», «Dokumentation», «Schulungsunterlagen».
   Präsentation (.pptx) → «Präsentation», «Deck», «Slides», «PowerPoint».
   Markenhandbuch v1.5. Volte-Schriften. Galledia-Logos. Schweizer Hochdeutsch (kein ß).
-version: "1.1"
+version: "1.2"
 ---
 
 # Galledia Office CI/CD
@@ -255,9 +255,25 @@ TOC: in Word mit F9 aktualisieren.
 
 CI-konforme PowerPoint (.pptx) via Code Execution (`helpers.py` + `Vorlage_5.pptx`).
 
+## Inhalt zuerst — die wichtigste Regel
+
+Eine Präsentation ist nur so gut wie ihr Inhalt. Reihenfolge der Inhaltsquellen:
+
+**1. Aktueller Gesprächs-/Projektkontext (höchste Priorität)**
+Wenn der Nutzer um eine **Zusammenfassung dieses Projekts / Gesprächs** bittet, ist der Inhalt bereits da — im aktuellen Gespräch und im Projekt-Wissen. Diesen TATSÄCHLICHEN Inhalt zusammenfassen:
+- Konkrete Entscheidungen, Schritte, Resultate, Versionen, Zahlen aus dem Gespräch
+- Was wurde gebaut, was wurde gelöst, was sind die nächsten Schritte
+- **Niemals auf generische Aussagen abstrahieren, wenn die Spezifika vor dir liegen.** Eine «Zusammenfassung» die den realen Inhalt durch Wikipedia-Bullets ersetzt, ist ein Totalausfall.
+
+**2. Chat-Historie durchsuchen (`conversation_search`)**
+Bei Galledia-internen Themen, die nicht im aktuellen Gespräch stehen (Jenny, ASMIQ, Digital Twin, n8n, m&k, Press-Release-Pipeline, Archiv): zuerst suchen — echte Zahlen, Architektur, Status, Namen sammeln.
+
+**3. Pflichtabfrage**
+Nur wenn Kontext und Historie nichts liefern oder das Thema extern ist.
+
 ## Pflichtabfrage — IMMER vor dem Bauen
 
-Bevor Code geschrieben wird, diese Fragen stellen — ausser sie sind bereits beantwortet:
+Bevor Code geschrieben wird, diese Fragen stellen — ausser sie sind bereits beantwortet oder aus der Historie bekannt:
 
 1. **Datum + Rechtseinheit** (Fusszeile)
 2. **Kernbotschaft** — Was soll die Zielgruppe nach der Präsentation denken/tun/entscheiden?

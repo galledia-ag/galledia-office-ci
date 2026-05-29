@@ -110,11 +110,15 @@ helpers.py rendert diese automatisch als echte PowerPoint-Bullets — kein manue
 
 ## Qualitätsprinzipien (verbindlich)
 
-**Headline = Aussage, nicht Thema:**
+**Headline = Aussage, nicht Thema — UND max. 32 Zeichen:**
 ```
-❌ «KI-Anwendungen»        → Thema
-✅ «KI spart 3'900 h/Monat» → Aussage mit Beweis
+❌ «KI-Anwendungen»                    → Thema, keine Aussage
+❌ «Der Verlags-Manager am Lebensende» → 34 Zeichen, zu lang → Fehler
+✅ «KI spart 3'900 h/Monat»            → Aussage, 22 Zeichen
 ```
+Headline max. **32 Zeichen**, Kapiteltitel max. **35 Zeichen** — sonst bricht der Build
+mit einem klaren Fehler ab (CI: 72pt bzw. 30pt müssen auf eine Zeile passen).
+Das zwingt zu knackigen Titeln. Lieber die Aussage in den Body als in eine lange Headline.
 
 **Zahlen statt Adjektive:** «39% weniger Aufwand», nicht «signifikante Steigerung».
 

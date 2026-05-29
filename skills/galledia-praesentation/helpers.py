@@ -1,5 +1,5 @@
 """
-helpers.py — Galledia Präsentations-Skill v1.5 (+ Riegel: wenig Text → erzwungen einspaltig)
+helpers.py — Galledia Präsentations-Skill v1.7 (CI-Grössen 72/30pt + Längenlimit 32/35 Zeichen)
 Schrift-Regel: Volte (Fliesstext/Kapiteltitel), Volte Semibold (Headlines/Hervorhebungen)
 Keine Versalien. Kein Volte Rounded in generiertem Inhalt.
 """
@@ -20,6 +20,12 @@ GL   = RGBColor(0xF2,0xF2,0xF5); TURK  = RGBColor(0x22,0xAA,0x9F)
 # ── CI-Schrift-Tokens ─────────────────────────────────────────────────────────
 BODY = "Volte"           # Fliesstext, Kapiteltitel, Labels
 SB   = "Volte Semibold"  # Headlines, Kartenüberschriften, Hervorhebungen
+
+# Titel-Grössen = CI-Vorgabe (fix, nie adaptiv). Länge begrenzt → immer 1 Zeile.
+HEAD_PT  = 72   # Headline — CI-Vorgabe
+KICK_PT  = 30   # Kapiteltitel — CI-Vorgabe
+MAX_HEAD = 32   # max. Zeichen Headline bei 72pt (gemessen: ~32 passen auf 1 Zeile)
+MAX_KICK = 35   # max. Zeichen Kapiteltitel bei 30pt
 
 # ── Template-Grid (aus Vorlage_5.pptx, idx=0/11 auf 04_vielText) ──────────────
 GX   = Inches(0.979)   # Linke Hilfslinie
@@ -124,6 +130,15 @@ def run(para, text, size, font, color,
     r.font.color.rgb=color; r.font.bold=bold; r.font.italic=italic
     return para
 
+def _check_len(text, limit, was):
+    """Erzwingt CI-Längenlimit. Zu lang → klarer Fehler (zwingt zu knackigem Titel)."""
+    t = (text or "").strip()
+    if len(t) > limit:
+        raise ValueError(
+            f"{was} zu lang: {len(t)} Zeichen (max. {limit}). "
+            f"Bitte kürzer formulieren: «{t}»")
+    return t
+
 def _headline_size(text):
     """Adaptive Headline-Grösse — verhindert Überlauf in den Body bei langen Headlines."""
     n = len(text or "")
@@ -164,22 +179,26 @@ def _footer_str(prs, folio):
 
 def _set_header(slide, kicker, headline):
     """
-    Setzt Kapiteltitel + Headline auf exakter Template-Position.
-    Füllt idx=0 und idx=11 direkt (kein Versatz), idx=13 wird geleert.
-    Kapiteltitel: 30 pt Volte, Schwarz. Headline: 72 pt Volte Semibold, Schwarz.
+    Kapiteltitel + Headline — EINHEITLICH über alle Folientypen.
+    Native Titel-Platzhalter werden geleert; Text kommt in manuelle Textboxen
+    an exakt denselben Koordinaten, Grössen und Anker. Garantiert identische
+    Position und Schriftgrösse auf jeder Folie. Headline-Box ist hoch genug
+    für 2 Zeilen — kein Autofit, keine adaptive Skalierung.
     """
     ph = _phs(slide)
-    if 0 in ph:
-        run(ph[0].text_frame.paragraphs[0], kicker, 30, BODY, BLACK, space_after=0)
-    else:
-        tf=tb(slide,GX,GY_K,GW,Inches(0.35))
-        run(tf.paragraphs[0], kicker, 30, BODY, BLACK, space_after=0)
+    kicker = _check_len(kicker, MAX_KICK, "Kapiteltitel")
+    headline = _check_len(headline, MAX_HEAD, "Headline")
+    for idx in (0, 11):
+        if idx in ph:
+            try: ph[idx].text = ""
+            except: pass
+    # Kapiteltitel — 30pt CI
+    tfk = tb(slide, GX, GY_K, GW, Inches(0.40), MSO_ANCHOR.TOP)
+    run(tfk.paragraphs[0], kicker, KICK_PT, BODY, BLACK, space_after=0)
+    # Headline — 72pt CI, 1 Zeile (durch Längenlimit garantiert)
     if headline:
-        if 11 in ph:
-            run(ph[11].text_frame.paragraphs[0], headline, _headline_size(headline), SB, BLACK, space_after=0); _enable_shrink(ph[11].text_frame)
-        else:
-            tf=tb(slide,GX,GY_H,GW,Inches(1.15))
-            run(tf.paragraphs[0], headline, _headline_size(headline), SB, BLACK, space_after=0)
+        tfh = tb(slide, GX, GY_H, GW, Inches(1.20), MSO_ANCHOR.TOP)
+        run(tfh.paragraphs[0], headline, HEAD_PT, SB, BLACK, space_after=0)
     if 13 in ph and not ph[13].text_frame.text:
         ph[13].text=""   # Prompt-Text unterdrücken
 
@@ -305,9 +324,7 @@ def _render_body(tf, body_text):
 def add_content(prs, variant, kapitel, headline, body_text, folio="", source=""):
     """Inhaltsfolie. variant='viel' oder 'wenig'."""
     s=prs.slides.add_slide(_lay(prs,variant)); ph=_phs(s)
-    ph[0].text=kapitel
-    run(ph[11].text_frame.paragraphs[0], headline, _headline_size(headline), SB, BLACK, space_after=0)
-    _enable_shrink(ph[11].text_frame)
+    _set_header(s, kapitel, headline)
     _render_body(ph[13].text_frame, body_text)
     if 14 in ph: run(ph[14].text_frame.paragraphs[0],
                      _footer_str(prs,folio),11,BODY,BLACK,space_after=0)

@@ -6,7 +6,7 @@ Quelle: Galledia Markenhandbuch v1.5, S. 43 / S. 47.
 
 | Standort | Strasse | PLZ Ort | Tel-Block |
 |---|---|---|---|
-| Zuerich | Buckhauserstrasse 24 | 8048 Zuerich | T +41 58 344 98 98 |
+| Zuerich | Baslerstrasse 60 | 8048 Zuerich | T +41 58 344 98 98 |
 | Frauenfeld | Zuercherstrasse 310 | 8500 Frauenfeld | T +41 58 344 94 94 |
 | Luzern | Maihofstrasse 76 | 6006 Luzern | T +41 58 344 91 50 |
 | Flawil (zentral) | Burgauerstrasse 50 | 9230 Flawil | T +41 58 344 96 96 |
@@ -40,7 +40,7 @@ Format: `<PLZ Ort> | <OE> | <Strasse>`
 
 Beispiel:
 ```
-8048 Zuerich | Galledia Fachmedien AG | Buckhauserstrasse 24
+8048 Zuerich | Galledia Fachmedien AG | Baslerstrasse 60
 ```
 
 Diese Zeile erscheint oben am Brief unterhalb des Logos (siehe Vorlage).

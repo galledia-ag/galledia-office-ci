@@ -1,5 +1,5 @@
 ---
-name: galledia-office-ci
+name: Galledia-Office-Dok-CI-CD
 description: >
   Galledia Office CI/CD — erstellt alle CI-konformen Galledia-Dokumente in einem Skill.
   Routing: Brief (.docx formal) → «Brief», «Anschreiben», «Geschäftsbrief», «Kundenbrief».
@@ -65,7 +65,7 @@ Immer `+41`, Prefix `T`/`M`, kein Fax (nicht mehr verwendet).
 
 | Standort | Strasse | PLZ Ort | Tel |
 |---|---|---|---|
-| Zürich | Buckhauserstrasse 24 | 8048 Zürich | T +41 58 344 98 98 |
+| Zürich | Baslerstrasse 60 | 8048 Zürich | T +41 58 344 98 98 |
 | Rapperswil-Jona | Tiefenaustrasse 2 | 8640 Rapperswil-Jona | T +41 44 928 56 11 |
 | Luzern | Maihofstrasse 76 | 6006 Luzern | T +41 58 344 91 50 |
 | Flawil | Burgauerstrasse 50 | 9230 Flawil | T +41 58 344 96 96 |

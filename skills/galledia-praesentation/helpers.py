@@ -1,5 +1,5 @@
 """
-helpers.py — Galledia Präsentations-Skill v1.3 (adaptive Headlines + adaptive Karten)
+helpers.py — Galledia Präsentations-Skill v1.5 (+ Riegel: wenig Text → erzwungen einspaltig)
 Schrift-Regel: Volte (Fliesstext/Kapiteltitel), Volte Semibold (Headlines/Hervorhebungen)
 Keine Versalien. Kein Volte Rounded in generiertem Inhalt.
 """
@@ -250,14 +250,65 @@ def add_agenda(prs, items, variant="agenda5", folio=""):
                      _footer_str(prs,folio),11,BODY,BLACK,space_after=0)
     return s
 
+def _set_bullet(para, char, font="Arial", indent_in=0.0):
+    """Setzt Bullet-Zeichen + hängenden Einzug auf einen Absatz."""
+    pPr = para._p.get_or_add_pPr()
+    if char is None:
+        pPr.set('marL', '0'); pPr.set('indent', '0')
+    else:
+        marL = int(Inches(indent_in + 0.28))
+        pPr.set('marL', str(marL))
+        pPr.set('indent', str(-int(Inches(0.28))))
+    for tag in ('a:buNone','a:buChar','a:buAutoNum','a:buFont'):
+        e = pPr.find(qn(tag))
+        if e is not None: pPr.remove(e)
+    if char is None:
+        pPr.append(pPr.makeelement(qn('a:buNone'), {}))
+        return
+    pPr.append(pPr.makeelement(qn('a:buFont'), {'typeface': font}))
+    pPr.append(pPr.makeelement(qn('a:buChar'), {'char': char}))
+
+def _render_body(tf, body_text):
+    """
+    Rendert body_text mit echter Formatierung statt rohem Text-Dump:
+      «· »  am Zeilenanfang → Ebene-1-Bullet (•, schwarz, Volte 19pt)
+      «·· » am Zeilenanfang → Ebene-2-Bullet (–, grau, Volte 17pt, eingerückt)
+      Zeile ohne Bullet     → Zwischentitel (Volte Semibold 22pt, schwarz, Abstand davor)
+      Leerzeile             → kleiner Abstand
+    """
+    lines = [l for l in str(body_text).split("\n")]
+    tf.word_wrap = True
+    first = True
+    def _para():
+        nonlocal first
+        if first:
+            first = False
+            return tf.paragraphs[0]
+        return tf.add_paragraph()
+    for line in lines:
+        s = line.strip()
+        if not s:
+            p = _para(); p.space_after = Pt(4); _set_bullet(p, None)
+            continue
+        if s.startswith("·· "):
+            p = _para(); run(p, s[3:].strip(), 17, BODY, G2, space_after=5)
+            p.level = 1; _set_bullet(p, "–", indent_in=0.4)
+        elif s.startswith("· "):
+            p = _para(); run(p, s[2:].strip(), 19, BODY, BLACK, space_after=6)
+            p.level = 0; _set_bullet(p, "•")
+        else:
+            # Zwischentitel
+            p = _para(); run(p, s, 22, SB, BLACK, space_after=4)
+            p.space_before = Pt(10); _set_bullet(p, None)
+    _enable_shrink(tf)
+
 def add_content(prs, variant, kapitel, headline, body_text, folio="", source=""):
     """Inhaltsfolie. variant='viel' oder 'wenig'."""
     s=prs.slides.add_slide(_lay(prs,variant)); ph=_phs(s)
     ph[0].text=kapitel
     run(ph[11].text_frame.paragraphs[0], headline, _headline_size(headline), SB, BLACK, space_after=0)
     _enable_shrink(ph[11].text_frame)
-    ph[13].text=body_text
-    _enable_shrink(ph[13].text_frame)
+    _render_body(ph[13].text_frame, body_text)
     if 14 in ph: run(ph[14].text_frame.paragraphs[0],
                      _footer_str(prs,folio),11,BODY,BLACK,space_after=0)
     if source and 15 in ph: ph[15].text=f"Quelle: {source}"
@@ -292,6 +343,14 @@ def kpi_grid(prs, kpis, kicker="", headline="", folio="", source=""):
 
 def two_column(prs,head_l,items_l,head_r,items_r,
                col2_red=True,kicker="",headline="",folio="",source=""):
+    # ── RIEGEL: Bei zu wenig Inhalt automatisch einspaltig rendern ──────────────
+    # Zweispaltig nur bei echtem Vergleich mit >=3 Punkten PRO Spalte.
+    # Sonst halbleere Karten → stattdessen dichte einspaltige add_content-Folie.
+    if min(len(items_l), len(items_r)) < 3:
+        body = head_l + "\n" + "\n".join(f"· {i}" for i in items_l) \
+             + "\n\n" + head_r + "\n" + "\n".join(f"· {i}" for i in items_r)
+        return add_content(prs, "viel", kicker or "", headline or "", body,
+                           folio=folio, source=source)
     s=_blank(prs)
     if kicker or headline: _set_header(s,kicker,headline)
     # Kartenhöhe an Inhalt anpassen (Header + Bullets), beide Karten gleich hoch

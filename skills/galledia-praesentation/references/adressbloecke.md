@@ -26,9 +26,7 @@ E-Mail-Standard: `galledia@galledia.ch` (zentral) bzw. `fachmedien-luzern@galled
 
 | Standort | Strasse | PLZ Ort | Tel-Block |
 |---|---|---|---|
-| Berneck (HQ) | Hafnerwisenstrasse 1 | 9442 Berneck | T +41 71 747 22 49 |
-| Buchs | Wiedenstrasse 52c | 9470 Buchs | T +41 58 344 92 42 |
-| Chur | Tittwiesenstrasse 61 | 7000 Chur | — |
+| Berneck (HQ) | Hafnerwisenstrasse 1 | 9442 Berneck | T +41 71 747 22 22 |
 
 ## galledia group ag
 

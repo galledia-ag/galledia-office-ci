@@ -1,6 +1,6 @@
 {
   "name": "galledia-office-ci",
-  "version": "1.1.1",
+  "version": "1.1.3",
   "description": "CI/CD-konforme Office-Dokumente fuer Galledia gemaess Markenhandbuch v1.5. Vier Skills: Brief und Kurzbrief (.docx, via MCP galledia-office), Dokument (.docx), Praesentation (.pptx, Code Execution mit Vorlage_5 + Volte + Logos). Slash-Commands: /brief, /kurzbrief, /dokument, /praesentation.",
   "author": {
     "name": "Galledia Fachmedien AG",

@@ -255,74 +255,261 @@ TOC: in Word mit F9 aktualisieren.
 
 CI-konforme PowerPoint (.pptx) via Code Execution (`helpers.py` + `Vorlage_5.pptx`).
 
-## Inhalt zuerst — die wichtigste Regel
+> ⚠️ **KRITISCH:** `generate_galledia_praesentation` MCP ist **DEPRECATED** — **NIE aufrufen**.
 
-Eine Präsentation ist nur so gut wie ihr Inhalt. Reihenfolge der Inhaltsquellen:
-
-**1. Aktueller Gesprächs-/Projektkontext (höchste Priorität)**
-Wenn der Nutzer um eine **Zusammenfassung dieses Projekts / Gesprächs** bittet, ist der Inhalt bereits da — im aktuellen Gespräch und im Projekt-Wissen. Diesen TATSÄCHLICHEN Inhalt zusammenfassen:
-- Konkrete Entscheidungen, Schritte, Resultate, Versionen, Zahlen aus dem Gespräch
-- Was wurde gebaut, was wurde gelöst, was sind die nächsten Schritte
-- **Niemals auf generische Aussagen abstrahieren, wenn die Spezifika vor dir liegen.** Eine «Zusammenfassung» die den realen Inhalt durch Wikipedia-Bullets ersetzt, ist ein Totalausfall.
-
-**2. Chat-Historie durchsuchen (`conversation_search`)**
-Bei Galledia-internen Themen, die nicht im aktuellen Gespräch stehen (Jenny, ASMIQ, Digital Twin, n8n, m&k, Press-Release-Pipeline, Archiv): zuerst suchen — echte Zahlen, Architektur, Status, Namen sammeln.
-
-**3. Pflichtabfrage**
-Nur wenn Kontext und Historie nichts liefern oder das Thema extern ist.
+---
 
 ## Pflichtabfrage — IMMER vor dem Bauen
 
-Bevor Code geschrieben wird, diese Fragen stellen — ausser sie sind bereits beantwortet oder aus der Historie bekannt:
+Bevor Code geschrieben wird — ausser bereits in der Anfrage enthalten:
 
 1. **Datum + Rechtseinheit** (Fusszeile)
-2. **Kernbotschaft** — Was soll die Zielgruppe nach der Präsentation denken/tun/entscheiden?
-3. **3 wichtigste Fakten/Zahlen** — Konkrete Daten, keine Meinungen
-4. **Zielgruppe** — GL, Kunde, Team, Investor?
-5. **Storyline** — Grober Aufbau (Problem → Lösung → Nächste Schritte?)
+2. **Kernbotschaft** — Was soll die Zielgruppe denken/tun/entscheiden?
+3. **Zielgruppe** — GL, Kunde, Team, Investor?
+4. **Storyline** — Grober Aufbau (Problem → Lösung → Nächste Schritte?)
 
-Wenn der Nutzer sagt «mir egal», «nur ein Test», «füll selbst» → akzeptieren, plausiblen Inhalt zum Thema erfinden, aber dennoch Qualitätsprinzipien anwenden.
+«Mir egal» / «füll selbst» → plausiblen Inhalt erfinden, Qualitätsprinzipien trotzdem anwenden.
 
-## Qualitätsprinzipien (verbindlich)
+---
 
-Claude leitet den Nutzer zu professionellen, aussagekräftigen Folien — nicht zu formatierten Aufzählungen.
+## Inhaltsdichte (VERBINDLICH — wichtigste Regel)
 
-**Pyramid Principle — jede Folie hat eine Hauptaussage:**
+**Maximal viel Kontext pro Folie — NIEMALS auf mehr Folien verteilen.**
+
 ```
-❌ Titel: «KI-Anwendungen»  (Thema, keine Aussage)
-✅ Titel: «KI spart 3'900 Stunden pro Monat»  (Aussage mit Beweis)
-```
-
-**Zahlen statt Adjektive:**
-```
-❌ «Signifikante Effizienzsteigerung»
-✅ «39% weniger manuelle Arbeit — 3'900h/Monat»
+❌ 3 Bullets pro Folie → 8 Folien
+✅ 10–15 Zeilen pro Folie → 5–6 Folien
 ```
 
-**Visuelle Beweise statt Bullet-Listen:**
-```
-❌ 5 Bullets zu «Vorteilen von KI»  → add_content("viel")
-✅ 3 KPI-Callouts mit konkreten Zahlen  → kpi_grid()
-✅ Vorher/Nachher-Vergleich  → two_column()
-✅ Prozess in 4 Schritten  → flow_pipeline()
+Richtwert für `add_content("viel")`: 3–4 Abschnittsüberschriften, je 3–4 Bullets = 12–16 Zeilen.
+Der Nutzer soll nicht nachfragen müssen «kannst du mehr Inhalt hinzufügen».
+
+---
+
+## Formatierungsregeln body_text (VERBINDLICH)
+
+### 1. Aufzählungszeichen — Echte PowerPoint-Bullets
+
+Kein manuelles `·` als Zeichen — `fmt(slide)` setzt echte Bullets automatisch:
+
+| Notation | Zeichen | Farbe | Ebene |
+|---|---|---|---|
+| `·` am Zeilenanfang | ● ausgefüllt | Schwarz | Ebene 1 |
+| `··` am Zeilenanfang | ○ hohl | Grau #666666 | Ebene 2 |
+
+### 2. Abschnittsüberschriften — Volte Semibold, KEINE Versalien
+
+```python
+# ❌ FALSCH — Versalien
+"MESSBARE EFFIZIENZGEWINNE\n· Bullet\n"
+
+# ✅ RICHTIG — Titel-Gross/Kleinschreibung
+"Messbare Effizienzgewinne\n· Bullet\n"
 ```
 
-**Eine Aussage pro Folie — nie mehr als 3 Bullets:**
+### 3. Bullet-Länge — max. 55 Zeichen
+
+Zu lange Bullets wrappen ohne korrekten Einzug. Lieber aufteilen:
+
 ```
-❌ 6 Bullets auf einer Inhaltsfolie
-✅ 3 Bullets max — oder aufteilen auf 2 Folien
+❌ · Kontext: 400k Token (200'000 Wörter), 256k Input @ 98% Accuracy Long-Context
+✅ · Kontext: 400k Token = 200'000 Wörter
+✅ · 256k Input @ 98% Accuracy (Long-Context)
 ```
 
-**Roter Faden — typische Struktur:**
+### 4. Leerzeile zwischen Abschnitten
+
+```python
+body = (
+    "Abschnitt 1\n"
+    "· Bullet A\n"
+    "\n"           # ← Leerzeile trennt Abschnitte
+    "Abschnitt 2\n"
+    "· Bullet B\n"
+)
 ```
-Folie 1: Titel (Thema + Kernbotschaft im Untertitel)
-Folie 2: Agenda
-Folie 3: Ausgangslage / Problem (mit Zahl oder Fakt)
-Folie 4: Lösung / Kernaussage (visuell — KPI, Pipeline, Zweispalter)
-Folie 5: Beweis / Ergebnis (Zahlen, Vergleich)
-Folie 6: Nächste Schritte (nummerierte Schritte)
-Folie 7: Schlussfolie
+
+---
+
+## `fmt()` — IMMER nach jedem `add_content()` aufrufen
+
+```python
+from pptx.oxml.ns import qn
+from pptx.dml.color import RGBColor
+from lxml import etree
+
+SB    = "Volte Semibold"
+BLACK = RGBColor(0x00, 0x00, 0x00)
+
+def _set_bullet(para, level=0):
+    """Echtes PowerPoint-Aufzählungszeichen mit hängendem Einzug."""
+    pPr = para._p.get_or_add_pPr()
+    pPr.set("marL", str(457200 + level * 457200))  # 0.5" / 1.0"
+    pPr.set("indent", "-342900")                    # hängend
+    for tag in ("a:buNone", "a:buChar", "a:buFont", "a:buClr", "a:buSzPct"):
+        for el in pPr.findall(qn(tag)):
+            pPr.remove(el)
+    etree.SubElement(pPr, qn("a:buFont")).set("typeface", "Arial")
+    sc = etree.SubElement(etree.SubElement(pPr, qn("a:buClr")), qn("a:srgbClr"))
+    sc.set("val", "000000" if level == 0 else "666666")
+    etree.SubElement(pPr, qn("a:buChar")).set(
+        "char", "\u25CF" if level == 0 else "\u25CB")  # ● oder ○
+
+def fmt(slide):
+    """
+    Nach add_content() aufrufen. Setzt:
+    - Nicht-Bullet-Zeilen → Volte Semibold (Abschnittstitel)
+    - ·  Zeilen           → Bullet Ebene 1 ● schwarz
+    - ·· Zeilen           → Bullet Ebene 2 ○ grau
+    """
+    ph = {p.placeholder_format.idx: p for p in slide.placeholders}
+    if 13 not in ph:
+        return
+    for para in ph[13].text_frame.paragraphs:
+        t = para.text.strip()
+        if not t:
+            continue
+        if t.startswith("··"):
+            for r in para.runs:
+                r.text = r.text.replace("··", "", 1).lstrip()
+            _set_bullet(para, level=1)
+        elif t.startswith("·"):
+            for r in para.runs:
+                r.text = r.text.replace("·", "", 1).lstrip()
+            _set_bullet(para, level=0)
+        else:
+            for r in para.runs:
+                r.font.name = SB
+                r.font.color.rgb = BLACK
+                r.font.bold = None
+
+# Verwendung:
+s = add_content(prs, "viel", "Strategie", "Use Cases mit ROI",
+    "Use Case 1\n"
+    "· Heute: 15 Min/Lead. Agent: 2 Min\n"
+    "·· LinkedIn → ICP-Filter → Outreach\n"
+    "·· Replies tracken → Eskalation Sales\n"
+    "· ROI: CHF 260k/Jahr bei CHF 5.4k Kosten\n",
+    folio="3")
+fmt(s)  # ← IMMER
 ```
+
+---
+
+## `preflight()` — PFLICHT vor `present_files()`
+
+```python
+def preflight(prs):
+    """Prüft CI-Regeln. Bei Fehler: Abbruch vor Ausgabe."""
+    errors, warnings = [], []
+    has_vis = False
+
+    for i, slide in enumerate(prs.slides, 1):
+        ph = {p.placeholder_format.idx: p for p in slide.placeholders}
+
+        # Headline ≤ 35 Zeichen
+        if 11 in ph:
+            hl = ph[11].text_frame.text.strip()
+            if len(hl) > 35:
+                errors.append(f"Folie {i}: Headline {len(hl)} Zeichen: «{hl}»")
+
+        # body_text Prüfungen
+        if 13 in ph:
+            for para in ph[13].text_frame.paragraphs:
+                t = para.text.strip()
+                if not t:
+                    continue
+                # Versalien
+                if not t.startswith("·") and t == t.upper() and len(t) > 3:
+                    errors.append(f"Folie {i}: Versalien: «{t}»")
+                # Semibold gesetzt?
+                if not t.startswith("·"):
+                    for r in para.runs:
+                        if r.font.name not in (SB, None):
+                            warnings.append(f"Folie {i}: Titel nicht Semibold: «{t}»")
+                # Bullet-Länge
+                if t.startswith("·") and len(t) > 57:
+                    warnings.append(f"Folie {i}: Bullet zu lang: «{t[:45]}…»")
+
+        # Titelfolie: Untertitel
+        if i == 1 and 12 in ph and not ph[12].text_frame.text.strip():
+            errors.append("Folie 1: Kein Untertitel auf Titelfolie.")
+
+        # Visualisierungsfolie erkennen
+        if 11 in ph and 13 not in ph:
+            has_vis = True
+
+    if not has_vis:
+        warnings.append("Keine Visualisierungsfolie (kpi_grid/flow_pipeline).")
+
+    for w in warnings:
+        print(f"⚠️  {w}")
+    if errors:
+        for e in errors:
+            print(f"❌  {e}")
+        raise ValueError(f"Pre-Flight: {len(errors)} Fehler — Ausgabe abgebrochen.")
+
+    print(f"✅  Pre-Flight OK ({len(prs.slides)} Folien, {len(warnings)} Hinweise)")
+```
+
+---
+
+## Titelfolie: Untertitel IMMER befüllen
+
+```python
+# ❌  add_title(prs, "KI 2026", "")
+# ✅
+add_title(prs, "KI 2026: Chancen und Roadmap", "Trends, Modelle, Use Cases")
+```
+
+---
+
+## Headline-Länge: max. 35 Zeichen (überall)
+
+Gilt für `add_content`, `kpi_grid`, `two_column`, `flow_pipeline`.
+
+```python
+# ❌  "18 Monate: Validierung → Skalierung → Transformation"  (53 Z.)
+# ✅  "Galledia: 18-Monatsplan"  (23 Z.)
+```
+
+---
+
+## `two_column()` — NUR auf ausdrücklichen Wunsch
+
+Standard ist `add_content("viel")` mit Abschnittsüberschriften.
+`two_column()` nur bei expliziten Begriffen: «Vergleich», «Gegenüberstellung», «zwei Spalten».
+
+---
+
+## Visualisierungsfolien — Mindestens 1–2 pro Präsentation
+
+`source=` bei Visualisierungen IMMER befüllen:
+
+```python
+kpi_grid(prs, [...], kicker="...", headline="...", folio="5",
+    source="Workday Research 2026 | Expleo April 2026")
+
+flow_pipeline(prs, [...], kicker="Roadmap", headline="Galledia: 18-Monatsplan",
+    folio="7", source="Interne Planung Galledia Fachmedien AG")
+```
+
+---
+
+## Typische Folienstruktur (6–8 Folien)
+
+```
+Folie 1: Titel  (Titel + Untertitel BEIDE befüllt)
+Folie 2: Inhaltsfolie  (12–16 Zeilen, fmt() aufrufen)
+Folie 3: Inhaltsfolie  (12–16 Zeilen, fmt() aufrufen)
+Folie 4: Inhaltsfolie  (12–16 Zeilen, fmt() aufrufen)
+Folie 5: kpi_grid()  mit source=
+Folie 6: Inhaltsfolie  (12–16 Zeilen, fmt() aufrufen)
+Folie 7: flow_pipeline()  mit source=
+Folie 8: Closing
+```
+
+---
 
 ## Setup
 
@@ -331,7 +518,6 @@ pip install python-pptx Pillow --break-system-packages
 ```
 
 ```python
-# Assets von GitHub laden (Verzeichnisstruktur für helpers.py erhalten)
 import os, sys, urllib.request
 _DIR = "/tmp/galledia_praesentation"
 os.makedirs(f"{_DIR}/assets/logo", exist_ok=True)
@@ -352,69 +538,14 @@ for _name, _url in [
 from helpers import (build_presentation, add_title, add_section, add_agenda,
                      add_content, add_closing, add_discussion,
                      kpi_grid, two_column, flow_pipeline, numbered_steps, timeline)
+from pptx.oxml.ns import qn
+from pptx.dml.color import RGBColor
+from lxml import etree
+
+# fmt(), _set_bullet(), preflight() hier einfügen (siehe oben)
 ```
 
-## Pflichtregeln — Häufige Fehler
-
-**add_agenda():**
-```python
-# ❌ FALSCH — 2 Zeilen pro Punkt, Teaser verboten
-add_agenda(prs, ["KI-Anwendungen
-Status und Hintergrund", "Roadmap
-Massnahmen"])
-# ✅ RICHTIG — 1 Zeile pro Punkt, kein Zusatz
-add_agenda(prs, ["KI-Anwendungen", "Roadmap", "Nächste Schritte"], folio="2")
-```
-
-**add_content() — Kapiteltitel:**
-```python
-# ❌ FALSCH — Zahlen als Kapiteltitel
-add_content(prs, "viel", "01", "Headline", "Text", folio="3")
-# ✅ RICHTIG — beschreibendes Wort
-add_content(prs, "viel", "KI-Trends", "Headline max. 35 Zeichen", "Text", folio="3")
-```
-
-**kpi_grid() / two_column() / flow_pipeline() — kicker + headline PFLICHT:**
-```python
-# ❌ FALSCH — kicker und headline fehlen → leerer Seitenkopf
-two_column(prs, "Heute", items_l, "Ziel", items_r, folio="4")
-# ✅ RICHTIG
-two_column(prs, "Heute", items_l, "Ziel 2026", items_r,
-           kicker="Transformation", headline="Heute vs. Ziel 2026",
-           col2_red=True, folio="4")
-
-# ❌ FALSCH
-kpi_grid(prs, [("96 GB","VRAM")], folio="3")
-# ✅ RICHTIG
-kpi_grid(prs, [("96 GB","VRAM"), ("256 GB","RAM"), ("6 TB","NVMe")],
-         kicker="Hardware", headline="R&D AI-Workhorse", folio="3")
-```
-
-**Headline-Länge:**
-```python
-# ❌ FALSCH — zu lang, läuft über
-add_content(prs, "viel", "KI-Trends", "KI in der Redaktion und Vermarktung 2026", ...)
-# ✅ RICHTIG — max. 35 Zeichen
-add_content(prs, "viel", "KI-Trends", "KI in Redaktion und Sales", ...)
-```
-
-## Verwendung
-
-```python
-prs = build_presentation(datum="29. Mai 2026", rechtseinheit="Galledia Fachmedien AG")
-add_title(prs, "KI in Medien", "Chancen und Anwendungen")
-add_agenda(prs, ["KI-Anwendungen", "Chancen und Anforderungen"], folio="2")
-add_content(prs, "viel", "KI-Anwendungen",
-            "KI in Redaktion und Sales",
-            "· Inhaltsautomatisierung\n· Lead-Generierung\n· Personalisierung",
-            folio="3")
-two_column(prs, "Chancen", ["Effizienz", "Neue Erlöse"],
-           "Anforderungen", ["Datenschutz", "Infrastruktur"],
-           kicker="Einschätzung", headline="Chancen vs. Anforderungen",
-           col2_red=True, folio="4")
-add_closing(prs)
-prs.save("output.pptx")
-```
+---
 
 ## Layouts (Vorlage_5)
 
@@ -425,19 +556,31 @@ prs.save("output.pptx")
 | Agenda ≤5 Punkte | `add_agenda(prs, items, variant="agenda5")` |
 | Agenda 6–12 Punkte | `add_agenda(prs, items, variant="agenda22")` |
 | Kernbotschaft | `add_content(prs, "wenig", ...)` |
-| Text / Struktur | `add_content(prs, "viel", ...)` |
-| KPI-Callouts | `kpi_grid(prs, [(zahl, label), ...])` |
-| Zweispalter | `two_column(prs, head_l, items_l, head_r, items_r)` |
-| Pipeline / Flow | `flow_pipeline(prs, nodes)` |
-| Numm. Schritte | `numbered_steps(prs, [(titel, beschr), ...])` |
-| Timeline | `timeline(prs, [(titel, beschr), ...])` |
+| Text / Struktur | `add_content(prs, "viel", ...)` + `fmt(slide)` |
+| KPI-Callouts | `kpi_grid(prs, [...], source=...)` |
+| Zweispalter | `two_column(...)` — NUR auf Wunsch |
+| Pipeline / Flow | `flow_pipeline(prs, nodes, source=...)` |
+| Numm. Schritte | `numbered_steps(prs, [...])` |
+| Timeline | `timeline(prs, [...])` |
 | Diskussion | `add_discussion(prs)` |
 | Schlussfolie | `add_closing(prs)` |
 
-## CI-Regeln Präsentation
+---
 
-- **Schrift:** `Volte` (Text/Labels) · `Volte Semibold` (Headlines) · `Volte Rounded Semibold` nur vordefinierte Layouts
-- **Keine Versalien.** Keine Folienübergänge. Max. 6 Zeilen / 3 Bullets pro Folie.
-- **Fusszeile:** Format `Folie N, Datum, Rechtseinheit` — immer über `build_presentation(datum=..., rechtseinheit=...)` setzen.
-- **Logo:** Rot auf hell · Weiss auf rot/dunkel · `add_logo(slide, variant='rot')`
-- **Roter Rhythmus:** mindestens jede 3.–4. Folie ein Rot-Anker (Zwischenfolie oder roter KPI).
+## CI-Kurzreferenz Präsentation
+
+| Regel | Wert |
+|---|---|
+| Schrift Fliesstext | Volte Regular |
+| Schrift Abschnittstitel | Volte Semibold via `fmt()` |
+| Versalien | VERBOTEN |
+| Headline max. | 35 Zeichen |
+| Bullet max. | 55 Zeichen |
+| Zeilen pro Folie | 12–16 |
+| Bullet Ebene 1 | ● schwarz via `·` |
+| Bullet Ebene 2 | ○ grau via `··` |
+| two_column | Nur auf ausdrücklichen Wunsch |
+| Titelfolie Untertitel | IMMER befüllen |
+| source= Visualisierungen | IMMER befüllen |
+| preflight() | IMMER vor present_files() |
+| Folienübergänge | VERBOTEN |

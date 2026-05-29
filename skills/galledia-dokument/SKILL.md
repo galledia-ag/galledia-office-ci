@@ -1,64 +1,96 @@
 ---
 name: galledia-dokument
-description: >
-  Erstellt ein laengeres Galledia-Dokument (.docx) — fuer Offerten,
-  Anleitungen, Konzepte, Reports, technische Dokumentationen,
-  Whitepapers, Pflichten-/Lastenhefte. Verwende diesen Skill immer wenn
-  ein User ein MEHRSEITIGES Galledia-Dokument braucht — KEIN Brief
-  (das ist galledia-brief) und KEIN Kurzbrief (das ist galledia-
-  kurzbrief). Triggert auf: "Dokument", "Offerte" (mehrseitig),
-  "Angebot (Doku)", "Anleitung", "Manual", "Handbuch", "Konzept",
-  "Report", "Studie", "Dokumentation", "Whitepaper", "Pflichtenheft",
-  "Lastenheft". Liefert eine .docx im Galledia-CI mit korrektem Theme
-  (Galledia2018-1, vollstaendige Akzentfarben-Palette).
+description: "Erstelle CI-konforme Galledia-Dokumente (.docx): Angebote, Offerten, Dokumentationen, Schulungsunterlagen. Triggers: 'erstelle ein Dokument', 'Offerte schreiben', 'Angebot', 'Dokumentation', '.docx', 'Word-Dokument'. Nutzt Vorlage_Dokument.dotx mit Galledia-Header (G-Logo), Fusszeile (Titel + Seitenzahl), DokTitel/DokUntertitel/Überschriften 1–3, Bullets, Tabellen."
 ---
 
-# Galledia Dokument
+# Galledia Dokument Skill
 
-Du erstellst ein laengeres Galledia-Dokument auf Basis der offiziellen
-Dokumentvorlage. Das Dokument hat Cover-Seite, Header mit Logo, Footer
-mit Adressblock, korrektes Galledia-Theme (Volte + alle Akzentfarben) —
-und Platz fuer Body-Inhalt, den der User in Word selbst editiert.
+CI-konforme Word-Dokumente aus `Vorlage_Dokument.dotx` via `fill_dokument.py`.
 
-## V1-Scope (heute)
+## Pflichtabfrage vor dem Start
 
-Das Tool liefert das **Geruest** mit Theme + Header/Footer + Cover-Titel.
-Den Body-Inhalt schreibt der User selbst in Word — die Vorlage zeigt
-eine Beispiel-Struktur. Der User loescht/ueberschreibt diese.
+Immer nachfragen, falls nicht im Gespräch bekannt:
+- **Dokumenttitel** (z.B. «KI-Hub Offerte», «Schulungsunterlagen Mailchimp»)
+- **Untertitel / Anlass** (z.B. «Angebot für XY AG»)
+- **Datum** (Ort und Datum, z.B. «Stäfa, 29. Mai 2026»)
+- **Rechtseinheit** (z.B. «Galledia Fachmedien AG»)
+- **Adresse** (z.B. «Seestrasse 90a, 8712 Stäfa»)
+- **Struktur** (Kapitel und Inhalte — wenn nicht klar, erst Gliederung vorschlagen und bestätigen lassen)
 
-## Workflow
+## Setup
 
-### Schritt 1 — Daten sammeln
+```bash
+pip install python-docx --break-system-packages
+```
 
-**Pflichtfeld:** `sender_oe` (eine der 5 OE).
+```python
+import sys, os
+sys.path.insert(0, os.path.dirname(__file__))
+from fill_dokument import build_document
+```
 
-**Optional:** `sender_street`, `sender_city`, `sender_contact_name`,
-`sender_contact_phone`, `sender_contact_mobile`, `sender_contact_email`,
-`recipient_lines`, `date_city`, `date`, `signatory_name`, `signatory_role`.
+## Verwendung
 
-**Wichtig: `cover_title`** — ersetzt die Original-Ueberschrift des
-Templates. Setze hier den gewuenschten Dokumenttitel, z.B.
-`Konzept Digital-Marketing 2026` oder `Anleitung Buchungsformular V2`.
+```python
+build_document(
+    titel       = "KI-Hub Offerte",
+    untertitel  = "Angebot AI-Infrastruktur für Fachmedien",
+    datum       = "Stäfa, 29. Mai 2026",
+    rechtseinheit = "Galledia Fachmedien AG",
+    adresse     = "Seestrasse 90a\n8712 Stäfa",   # \n = Zeilenumbruch
+    empfaenger  = "XY AG\nz.H. Herr Max Muster\nMusterstrasse 1\nCH-8000 Zürich",  # optional, \n = Zeilenumbruch
+    abschnitte  = [
+        {
+            "titel": "Ausgangslage",          # → Überschrift 1 (auto-nummeriert)
+            "inhalt": [
+                {"typ": "text",    "inhalt": "Fliesstext..."},
+                {"typ": "bullet",  "inhalt": "Aufzählungspunkt"},
+                {"typ": "h2",      "inhalt": "Unterkapitel"},    # → Überschrift 2
+                {"typ": "h3",      "inhalt": "Abschnitt"},       # → Überschrift 3
+                {"typ": "tabelle", "inhalt": [
+                    ["Spalte A", "Spalte B"],   # Erste Zeile = Kopfzeile (rot)
+                    ["Wert 1",   "Wert 2"],
+                ]},
+            ]
+        },
+    ],
+    output_path = "output.docx",
+)
+```
 
-### Schritt 2 — CI-Validierung
+## Ausgabe-Layout
 
-Wie bei Brief — siehe `references/schreibweisen.md`.
+| Element | Style | Formatierung |
+|---|---|---|
+| Dokumenttitel | DokTitel | Volte Semibold, 36 pt |
+| Untertitel | DokUntertitel | 22 pt |
+| Datum / Ort | DokDatum | Vorlage |
+| Absender | DokAbsender | Rechtseinheit / Adresse |
+| Empfänger | DokEmpfaenger | Mehrzeilig via \n |
+| Kapitel | Überschrift 1 | Volte Semibold, auto-nummeriert 1. 2. 3. |
+| Unterkapitel | Überschrift 2 | auto-nummeriert 1.1 1.2 |
+| Abschnitt | Überschrift 3 | |
+| Fliesstext | Standard | Volte Regular, 11 pt |
+| Aufzählung | DokBullet | Punkt |
+| Tabelle Kopf | Tabellen-Titel | Volte Semibold, Rot #E61C52, Hintergrund #F2F2F5 |
+| Tabelle Inhalt | Tabellen-Inhalt | Volte Regular |
+| Inhaltsverzeichnis | automatisch | In Word mit F9 aktualisieren |
+| Kopfzeile | Header | Galledia G-Logo rechts |
+| Fusszeile | Footer | Dokumenttitel links, Seite N von M rechts |
 
-### Schritt 3 — MCP-Tool aufrufen
+## CI-Regeln
 
-`mcp__galledia-office__generate_galledia_dokument` mit dem JSON.
+- Keine Versalien in Überschriften
+- Schweizer Rechtschreibung (kein ß)
+- Tabellen immer mit Kopfzeile (erste Zeile)
+- Fliesstext nach Tabellen: `{'typ': 'text', 'inhalt': ''}` für Abstand
+- Empfänger-Block nur wenn vorhanden (optional)
+- Inhaltsverzeichnis: in Word mit F9 aktualisieren oder Strg+A → F9
 
-### Schritt 4 — Link + Hinweis
+## Aufbau
 
-Download-Link als Markdown-Link mit Filename praesentieren. PLUS:
-dem User klar sagen, dass er die Beispiel-Inhalte in Word ueberschreiben
-oder loeschen muss — das Skill liefert das Geruest, nicht den Inhalt.
+Deckblatt → TOC (eigene Seite) → Inhalt. Ort/Datum und Rechtseinheit stehen nur auf dem Deckblatt.
 
-**WICHTIG: Niemals selbst die download_url per HTTP/curl/web_fetch
-herunterladen.**
+## Hinweis Inhaltsverzeichnis
 
-## Was NICHT in diesem Skill
-
-- 1-seitiger Brief → `galledia-brief`
-- Begleitschreiben / Memo → `galledia-kurzbrief`
-- Praesentation → `galledia-praesentation`
+Das TOC-Feld wird korrekt generiert. Word aktualisiert es beim ersten Öffnen automatisch oder manuell via F9. In LibreOffice: Extras → Felder aktualisieren.

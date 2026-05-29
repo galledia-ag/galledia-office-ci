@@ -255,11 +255,58 @@ TOC: in Word mit F9 aktualisieren.
 
 CI-konforme PowerPoint (.pptx) via Code Execution (`helpers.py` + `Vorlage_5.pptx`).
 
-## Pflichtabfrage
+## Pflichtabfrage — IMMER vor dem Bauen
 
-- **Datum** der Fusszeile (z.B. «29. Mai 2026»)
-- **Rechtseinheit** (z.B. «Galledia Fachmedien AG»)
-- **Inhalt / Storyline**
+Bevor Code geschrieben wird, diese Fragen stellen — ausser sie sind bereits beantwortet:
+
+1. **Datum + Rechtseinheit** (Fusszeile)
+2. **Kernbotschaft** — Was soll die Zielgruppe nach der Präsentation denken/tun/entscheiden?
+3. **3 wichtigste Fakten/Zahlen** — Konkrete Daten, keine Meinungen
+4. **Zielgruppe** — GL, Kunde, Team, Investor?
+5. **Storyline** — Grober Aufbau (Problem → Lösung → Nächste Schritte?)
+
+Wenn der Nutzer sagt «mir egal», «nur ein Test», «füll selbst» → akzeptieren, plausiblen Inhalt zum Thema erfinden, aber dennoch Qualitätsprinzipien anwenden.
+
+## Qualitätsprinzipien (verbindlich)
+
+Claude leitet den Nutzer zu professionellen, aussagekräftigen Folien — nicht zu formatierten Aufzählungen.
+
+**Pyramid Principle — jede Folie hat eine Hauptaussage:**
+```
+❌ Titel: «KI-Anwendungen»  (Thema, keine Aussage)
+✅ Titel: «KI spart 3'900 Stunden pro Monat»  (Aussage mit Beweis)
+```
+
+**Zahlen statt Adjektive:**
+```
+❌ «Signifikante Effizienzsteigerung»
+✅ «39% weniger manuelle Arbeit — 3'900h/Monat»
+```
+
+**Visuelle Beweise statt Bullet-Listen:**
+```
+❌ 5 Bullets zu «Vorteilen von KI»  → add_content("viel")
+✅ 3 KPI-Callouts mit konkreten Zahlen  → kpi_grid()
+✅ Vorher/Nachher-Vergleich  → two_column()
+✅ Prozess in 4 Schritten  → flow_pipeline()
+```
+
+**Eine Aussage pro Folie — nie mehr als 3 Bullets:**
+```
+❌ 6 Bullets auf einer Inhaltsfolie
+✅ 3 Bullets max — oder aufteilen auf 2 Folien
+```
+
+**Roter Faden — typische Struktur:**
+```
+Folie 1: Titel (Thema + Kernbotschaft im Untertitel)
+Folie 2: Agenda
+Folie 3: Ausgangslage / Problem (mit Zahl oder Fakt)
+Folie 4: Lösung / Kernaussage (visuell — KPI, Pipeline, Zweispalter)
+Folie 5: Beweis / Ergebnis (Zahlen, Vergleich)
+Folie 6: Nächste Schritte (nummerierte Schritte)
+Folie 7: Schlussfolie
+```
 
 ## Setup
 
@@ -291,18 +338,64 @@ from helpers import (build_presentation, add_title, add_section, add_agenda,
                      kpi_grid, two_column, flow_pipeline, numbered_steps, timeline)
 ```
 
+## Pflichtregeln — Häufige Fehler
+
+**add_agenda():**
+```python
+# ❌ FALSCH — 2 Zeilen pro Punkt, Teaser verboten
+add_agenda(prs, ["KI-Anwendungen
+Status und Hintergrund", "Roadmap
+Massnahmen"])
+# ✅ RICHTIG — 1 Zeile pro Punkt, kein Zusatz
+add_agenda(prs, ["KI-Anwendungen", "Roadmap", "Nächste Schritte"], folio="2")
+```
+
+**add_content() — Kapiteltitel:**
+```python
+# ❌ FALSCH — Zahlen als Kapiteltitel
+add_content(prs, "viel", "01", "Headline", "Text", folio="3")
+# ✅ RICHTIG — beschreibendes Wort
+add_content(prs, "viel", "KI-Trends", "Headline max. 35 Zeichen", "Text", folio="3")
+```
+
+**kpi_grid() / two_column() / flow_pipeline() — kicker + headline PFLICHT:**
+```python
+# ❌ FALSCH — kicker und headline fehlen → leerer Seitenkopf
+two_column(prs, "Heute", items_l, "Ziel", items_r, folio="4")
+# ✅ RICHTIG
+two_column(prs, "Heute", items_l, "Ziel 2026", items_r,
+           kicker="Transformation", headline="Heute vs. Ziel 2026",
+           col2_red=True, folio="4")
+
+# ❌ FALSCH
+kpi_grid(prs, [("96 GB","VRAM")], folio="3")
+# ✅ RICHTIG
+kpi_grid(prs, [("96 GB","VRAM"), ("256 GB","RAM"), ("6 TB","NVMe")],
+         kicker="Hardware", headline="R&D AI-Workhorse", folio="3")
+```
+
+**Headline-Länge:**
+```python
+# ❌ FALSCH — zu lang, läuft über
+add_content(prs, "viel", "KI-Trends", "KI in der Redaktion und Vermarktung 2026", ...)
+# ✅ RICHTIG — max. 35 Zeichen
+add_content(prs, "viel", "KI-Trends", "KI in Redaktion und Sales", ...)
+```
+
 ## Verwendung
 
 ```python
 prs = build_presentation(datum="29. Mai 2026", rechtseinheit="Galledia Fachmedien AG")
-add_title(prs, "Titel", "Untertitel | Datum")
-add_agenda(prs, ["Punkt 1", "Punkt 2", "Punkt 3"], folio="2")
-add_content(prs, "viel", "Kapiteltitel", "Headline", "Text...", folio="3")
-kpi_grid(prs, [("96 GB","VRAM"), ("256 GB","RAM")], kicker="Hardware", headline="Workhorse", folio="4")
-two_column(prs, "Heute", ["Punkt A"], "Ziel 2026", ["Punkt B"], col2_red=True, folio="5")
-flow_pipeline(prs, [("Input","Dokumente"), ("Parsing","NLP"), ("Antwort","LLM")], folio="6")
-numbered_steps(prs, [("Schritt 1","Beschr."), ("Schritt 2","Beschr.")], folio="7")
-add_discussion(prs)
+add_title(prs, "KI in Medien", "Chancen und Anwendungen")
+add_agenda(prs, ["KI-Anwendungen", "Chancen und Anforderungen"], folio="2")
+add_content(prs, "viel", "KI-Anwendungen",
+            "KI in Redaktion und Sales",
+            "· Inhaltsautomatisierung\n· Lead-Generierung\n· Personalisierung",
+            folio="3")
+two_column(prs, "Chancen", ["Effizienz", "Neue Erlöse"],
+           "Anforderungen", ["Datenschutz", "Infrastruktur"],
+           kicker="Einschätzung", headline="Chancen vs. Anforderungen",
+           col2_red=True, folio="4")
 add_closing(prs)
 prs.save("output.pptx")
 ```

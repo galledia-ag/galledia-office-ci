@@ -29,7 +29,75 @@ Frage den User nach:
 - Layout je Folie (siehe Tabelle unten)
 - Ziel-Organisation (Default: `Galledia Fachmedien AG`)
 
-### Verfuegbare Layouts
+### Zwei Wege zur Folie: Patterns (PROFI) vs. Layouts (KLASSISCH)
+
+Der Skill unterstuetzt zwei Generierungs-Modi:
+
+### Pattern-Modus (empfohlen fuer professionelle Decks)
+
+Setze `pattern` im slide_def — die Folie wird custom komponiert aus
+Shapes (Rechtecke, Linien, Text-Boxen) mit Galledia-Farben und -Schriften.
+Resultat: visuell auf Niveau einer designerten Praesentation.
+
+**Verfuegbare Patterns:**
+
+| Pattern | Wann verwenden | Felder |
+|---|---|---|
+| `hero_split` | **Titelfolie** — Split-Layout rot/schwarz mit Hero-Wort + Titel + Bullets | `hero_text`, `hero_subtitle`, `title`, `description`, `bullets`, `footer` |
+| `numbered_agenda` | **Agenda-Folie** — 5-9 Items mit roten Nummernboxen 01/02/... + Titel + Teaser | `title`, `items: [{title, teaser}]`, `slide_no`, `total`, `context` |
+| `card_grid_3` | **3-Karten-Konzept** (z.B. Kernprinzipien, Strategie-Pfeiler) | `title`, `cards: [{icon, title, bullets}]`, `slide_no`, `total`, `context` |
+
+Beispiel hero_split:
+```json
+{
+  "pattern": "hero_split",
+  "hero_text": "AI HUB",
+  "hero_subtitle": "Motorex AG\nForschung & Entwicklung",
+  "title": "Modularer On-Site AI-Hub",
+  "description": "Lokale KI-Infrastruktur — sicher, skalierbar, lizenzfrei.",
+  "bullets": ["Datensicherheit – keine Cloud", "Open Source", "Phase 1 → 2"],
+  "footer": "Konzept · Mai 2026"
+}
+```
+
+Beispiel numbered_agenda:
+```json
+{
+  "pattern": "numbered_agenda",
+  "title": "Agenda",
+  "slide_no": 2, "total": 12,
+  "context": "F&E AI-Hub Konzept",
+  "items": [
+    {"title": "Ausgangslage", "teaser": "Warum brauchen wir das?"},
+    {"title": "Kernprinzipien", "teaser": "Sicherheit, Modularitaet"}
+  ]
+}
+```
+
+Beispiel card_grid_3:
+```json
+{
+  "pattern": "card_grid_3",
+  "title": "Drei Kernprinzipien",
+  "slide_no": 4, "total": 12,
+  "cards": [
+    {"icon": "🛡", "title": "Datensicherheit", "bullets": ["...", "..."]},
+    {"icon": "⊜", "title": "Open Source", "bullets": ["..."]},
+    {"icon": "⚡", "title": "Modularitaet", "bullets": ["..."]}
+  ]
+}
+```
+
+**Wann Patterns nutzen:** Kunden-Praesentationen, Pitch-Decks, Strategie-
+Vorstellungen, alles wo professionelle Optik zaehlt. Nicht fuer schnelle
+interne Stichwort-Folien.
+
+### Layout-Modus (klassisch, fuer einfache Inhalte)
+
+Setze `layout` statt `pattern` — die Folie nutzt eines der 16 Layouts aus
+der offiziellen Galledia-Vorlage. Einfacher, aber visuell sparsamer.
+
+## Verfuegbare Layouts
 
 | Key | Was | Wann verwenden |
 |---|---|---|

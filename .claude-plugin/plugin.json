@@ -1,6 +1,6 @@
 {
   "name": "galledia-office-ci",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "CI/CD-konforme Office-Dokumente fuer Galledia gemaess Markenhandbuch v1.5. Vier Skills (Brief, Kurzbrief, Dokument, Praesentation) plus Slash-Commands (/brief, /kurzbrief, /dokument, /praesentation). Backend: galledia-office-mcp (HTTP) auf epimetheus.uk. Funktioniert in Cowork Web + Desktop unabhaengig von Sandbox-VM. v0.8 enthaelt Praesentations-Verbesserungen (weisser Titel 72pt, korrekte Footer-Formate, Logo auf Schlussfolie via Vorlage_3) und Theme-Fix fuer Word-Dokumente.",
   "author": {
     "name": "Galledia Fachmedien AG",

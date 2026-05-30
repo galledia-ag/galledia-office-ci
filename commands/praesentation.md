@@ -1,10 +1,10 @@
 ---
-description: Galledia-Präsentation im CI/CD erstellen (Vorlage_5, Code Execution)
+description: Galledia-Präsentation im CI/CD erstellen (Vorlage_6, Code Execution)
 allowed-tools: ["Code Execution"]
 ---
 
 Aktiviere den `galledia-praesentation`-Skill und erstelle eine CI/CD-konforme
-PowerPoint-Präsentation (.pptx) mit Vorlage_5, Volte-Schrift und Galledia-Logos.
+PowerPoint-Präsentation (.pptx) mit Vorlage_6, Volte-Schrift und Galledia-Logos.
 
 **Pflichtabfrage vor dem Start:**
 - Datum der Präsentation (für Fusszeile, z.B. «29. Mai 2026»)

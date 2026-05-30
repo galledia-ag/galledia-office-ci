@@ -4,7 +4,7 @@ description: >
   Erstellt CI-konforme Galledia-PowerPoint-Präsentationen (.pptx) via Code Execution.
   Auslöser: «Präsentation», «Deck», «Slides», «PowerPoint», «.pptx», «Foliensatz»,
   «Pitch», «GL-Präsentation», «Kundenpräsentation», «fasse … als Präsentation zusammen».
-  Markenhandbuch v1.5, Vorlage_5, Volte-Schriften, Galledia-Rot #E61C52, Logos.
+  Markenhandbuch v1.5, Vorlage_6, Volte-Schriften, Galledia-Rot #E61C52, Logos.
   NUR für Präsentationen — Brief/Kurzbrief/Dokument laufen über einen separaten Skill.
 version: "1.0"
 ---
@@ -43,7 +43,7 @@ import os, sys, urllib.request
 D = "/tmp/galledia_praes"; os.makedirs(f"{D}/assets/logo", exist_ok=True)
 B = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-praesentation"
 for n, u in [("helpers.py","helpers.py"),
-             ("assets/Vorlage_5.pptx","assets/Vorlage_5.pptx"),
+             ("assets/Vorlage_6.pptx","assets/Vorlage_6.pptx"),
              ("assets/logo/logo_rot.png","assets/logo/logo_rot.png"),
              ("assets/logo/logo_weiss.png","assets/logo/logo_weiss.png"),
              ("assets/logo/logo_schwarz.png","assets/logo/logo_schwarz.png")]:

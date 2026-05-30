@@ -27,7 +27,7 @@ KICK_PT  = 30   # Kapiteltitel — CI-Vorgabe
 MAX_HEAD = 32   # max. Zeichen Headline bei 72pt (gemessen: ~32 passen auf 1 Zeile)
 MAX_KICK = 35   # max. Zeichen Kapiteltitel bei 30pt
 
-# ── Template-Grid (aus Vorlage_5.pptx, idx=0/11 auf 04_vielText) ──────────────
+# ── Template-Grid (aus Vorlage_6.pptx, idx=0/11 auf 04_vielText) ──────────────
 GX   = Inches(0.979)   # Linke Hilfslinie
 GY_K = Inches(0.750)   # Y Kapiteltitel
 GY_H = Inches(1.061)   # Y Headline
@@ -39,7 +39,7 @@ LAYOUTS = {
     "zwischenrot":"2_Zwischenfolie rot","agenda5":"01_Agenda 5","agenda22":"01_Agenda 22",
     "wenig":"02_wenigText","viel":"04_vielText","leer":"Leer","piktogramme":"Piktogramme",
 }
-_TEMPLATE = os.path.join(os.path.dirname(__file__),"assets","Vorlage_5.pptx")
+_TEMPLATE = os.path.join(os.path.dirname(__file__),"assets","Vorlage_6.pptx")
 _LOGO_DIR  = os.path.join(os.path.dirname(__file__),"assets","logo")
 LOGOS = {  # CI: Rot→helle Folien | Weiss→rote/dunkle Folien | Schwarz→fehlt (neu exportieren)
     "rot":              os.path.join(_LOGO_DIR,"logo_rot.png"),
@@ -220,7 +220,7 @@ def _set_footer(slide, prs, folio, source=""):
 
 # ── Native-Layout-Slides ──────────────────────────────────────────────────────
 
-# Titelfolie-Geometrie (aus Vorlage_5 gemessen)
+# Titelfolie-Geometrie (aus Vorlage_6 gemessen)
 _TITLE_Y_SUB        = Inches(3.968)   # y idx=10 Untertitel (bei 2-zeiligem Haupttitel)
 _TITLE_Y_MAIN       = Inches(4.683)   # y idx=0  Haupttitel
 _TITLE_1LINE_SHIFT  = Inches(0.68)    # Verschiebung nach unten bei 1-zeiligem Haupttitel
@@ -237,7 +237,7 @@ def add_title(prs, title, subtitle=""):
     if 10 in ph and subtitle: ph[10].text=subtitle
     if len(title) <= _TITLE_CHARS_1LINE:
         shift = int(_TITLE_1LINE_SHIFT)
-        # Gemessene Layout-Koordinaten (aus Vorlage_5): x, y, w, h in EMU
+        # Gemessene Layout-Koordinaten (aus Vorlage_6): x, y, w, h in EMU
         specs = {
             0:  (Inches(1.023), Inches(4.683), Inches(17.955), Inches(2.175)),
             10: (Inches(1.023), Inches(3.968), Inches(17.955), Inches(0.752)),

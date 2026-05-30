@@ -3,7 +3,7 @@
 Claude-Plugin für CI/CD-konforme Office-Dokumente der Galledia-Gruppe.
 
 **v1.0.0** — Hybride Architektur:
-- `galledia-praesentation` — PowerPoint (**Code Execution**, Vorlage_5 + Volte + Logos)
+- `galledia-praesentation` — PowerPoint (**Code Execution**, Vorlage_6 + Volte + Logos)
 - `galledia-brief` — Geschäftsbrief (.docx, MCP `galledia-office`)
 - `galledia-kurzbrief` — Kurzbrief (.docx, MCP `galledia-office`)
 - `galledia-dokument` — Dokument für Offerten/Schulungen (.docx)
@@ -32,7 +32,7 @@ galledia-office-ci/
 │   │   ├── SKILL.md         ← Instruktionen + CI-Regeln
 │   │   ├── helpers.py       ← python-pptx Builder-Library
 │   │   ├── assets/
-│   │   │   ├── Vorlage_5.pptx      ← Galledia-Template (10 Layouts)
+│   │   │   ├── Vorlage_6.pptx      ← Galledia-Template (10 Layouts)
 │   │   │   ├── fonts/              ← Volte-Familie (5 OTF)
 │   │   │   └── logo/               ← Logos rot/weiss/schwarz (6 PNG)
 │   │   └── references/      ← Markenhandbuch, Schreibweisen, Adressen
@@ -43,7 +43,7 @@ galledia-office-ci/
     └── DOCKER_CLEANUP.md    ← Roadmap MCP-Ablösung
 ```
 
-## Präsentation — verfügbare Layouts (Vorlage_5)
+## Präsentation — verfügbare Layouts (Vorlage_6)
 
 | Layout | Typ |
 |---|---|
@@ -70,7 +70,7 @@ Nach jedem `git push main` → Marketplace synct automatisch (bis 30 Min).
 
 | Asset | Pfad | Lieferant |
 |---|---|---|
-| PowerPoint-Vorlage | `skills/galledia-praesentation/assets/Vorlage_5.pptx` | Designer (Prepress Flawil) |
+| PowerPoint-Vorlage | `skills/galledia-praesentation/assets/Vorlage_6.pptx` | Designer (Prepress Flawil) |
 | Volte-Fonts | `skills/galledia-praesentation/assets/fonts/` | Brand-Guard |
 | Logos | `skills/galledia-praesentation/assets/logo/` | M:\\\_organisation\\20_logos |
 | Word-Briefvorlage | `skills/galledia-brief/` | Designer |
@@ -80,7 +80,7 @@ Nach jedem `git push main` → Marketplace synct automatisch (bis 30 Min).
 | Version | Inhalt | Status |
 |---|---|---|
 | v0.1–v0.3 | Brief, Kurzbrief (MCP) | ✅ |
-| v1.0.0 | Präsentation → Code Execution (Vorlage_5 + Volte + Logos) | abgelöst |
+| v1.0.0 | Präsentation → Code Execution (Vorlage_6 + Volte + Logos) | abgelöst |
 | v1.1.x | Dokument-Skill, kombinierter Chat-Skill, Adressen, MCP-Bereinigung | abgelöst |
 | **v1.2.0** | **Adaptive Layouts (Headlines + Karten), Inhalts-Priorisierung, Qualitätsprinzipien** | **✅ aktuell** |
 | v1.3.0 | Brief + Kurzbrief auf Code Execution (MCP-Ablösung) | geplant |

@@ -6,7 +6,7 @@ description: >
   erstellt, gefüllt oder überarbeitet werden soll. Liefert CI-Mechanik (Layouts, Farben,
   Schriften, Regeln) — nicht den Inhalt.
 version: "1.0"
-template: assets/Vorlage_5.pptx
+template: assets/Vorlage_6.pptx
 ---
 
 # Galledia-Präsentation
@@ -21,7 +21,7 @@ Layouts). Gestaltung = freie Komposition INNERHALB dieses Rahmens. Niemals ein E
 
 | Asset | Pfad | Status |
 |---|---|---|
-| Template | `assets/Vorlage_5.pptx` | ✅ bereit |
+| Template | `assets/Vorlage_6.pptx` | ✅ bereit |
 | Volte Regular | `assets/fonts/Volte-Regular.otf` | ✅ bereit |
 | Volte Regular Italic | `assets/fonts/Volte-RegularItalic.otf` | ✅ bereit |
 | Volte Semibold | `assets/fonts/Volte-Semibold.otf` | ✅ bereit |
@@ -139,7 +139,7 @@ TOC: in Word mit F9 aktualisieren.
 
 # 4. Präsentation
 
-CI-konforme PowerPoint (.pptx) via Code Execution (`helpers.py` + `Vorlage_5.pptx`).
+CI-konforme PowerPoint (.pptx) via Code Execution (`helpers.py` + `Vorlage_6.pptx`).
 
 ## Inhalt zuerst — die wichtigste Regel
 
@@ -226,7 +226,7 @@ sys.path.insert(0, _DIR)
 _BASE = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-praesentation"
 for _name, _url in [
     ("helpers.py",                   "helpers.py"),
-    ("assets/Vorlage_5.pptx",        "assets/Vorlage_5.pptx"),
+    ("assets/Vorlage_6.pptx",        "assets/Vorlage_6.pptx"),
     ("assets/logo/logo_rot.png",     "assets/logo/logo_rot.png"),
     ("assets/logo/logo_weiss.png",   "assets/logo/logo_weiss.png"),
     ("assets/logo/logo_schwarz.png", "assets/logo/logo_schwarz.png"),
@@ -321,7 +321,7 @@ Nie zwei Zwischenfolien hintereinander, nie alle Folien gleich.
 
 ---
 
-## Layout-Entscheidungstabelle (Vorlage_5)
+## Layout-Entscheidungstabelle (Vorlage_6)
 
 | Inhaltstyp | Layout-Name | Platzhalter |
 |---|---|---|
@@ -337,7 +337,7 @@ Nie zwei Zwischenfolien hintereinander, nie alle Folien gleich.
 | Schluss-/Abschlussfolie | `Schlussfolie` | keine — zeigt weisses Logo auf Rot |
 
 **Hinweis `Leer`:** Im Bearbeitungsmodus zeigt das Layout leere Platzhalter-Rahmen
-(Bekanntes Problem aus Vorlage_5). In Render + Präsentation unsichtbar. Kein Blocker.
+(Bekanntes Problem aus Vorlage_6). In Render + Präsentation unsichtbar. Kein Blocker.
 
 ---
 

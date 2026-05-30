@@ -11,8 +11,8 @@
         "source": "github",
         "repo": "galledia-ag/galledia-office-ci"
       },
-      "description": "CI/CD-konforme Office-Dokumente fuer Galledia: Brief, Kurzbrief (.docx via MCP), Praesentation (.pptx via Skill/Code Execution, Vorlage_5 + Volte + Logos), Dokument.",
-      "version": "0.0.1"
+      "description": "CI/CD-konforme Office-Dokumente fuer Galledia: Brief, Kurzbrief (.docx via MCP), Praesentation (.pptx via Skill/Code Execution, Vorlage_6 + Volte + Logos), Dokument.",
+      "version": "0.0.2"
     }
   ]
 }

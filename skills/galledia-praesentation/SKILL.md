@@ -259,7 +259,7 @@ add_agenda(prs, ["KI-Anwendungen", "Roadmap", "Nächste Schritte"], folio="2")
 # ❌ FALSCH — Zahlen als Kapiteltitel
 add_content(prs, "viel", "01", "Headline", "Text", folio="3")
 # ✅ RICHTIG — beschreibendes Wort
-add_content(prs, "viel", "KI-Trends", "Headline max. 35 Zeichen", "Text", folio="3")
+add_content(prs, "viel", "KI-Trends", "Headline max. 32 Zeichen", "Text", folio="3")
 ```
 
 **kpi_grid() / two_column() / flow_pipeline() — kicker + headline PFLICHT:**
@@ -278,13 +278,30 @@ kpi_grid(prs, [("96 GB","VRAM"), ("256 GB","RAM"), ("6 TB","NVMe")],
          kicker="Hardware", headline="R&D AI-Workhorse", folio="3")
 ```
 
-**Headline-Länge:**
+**Längen-Limits (HART, vom Code erzwungen):**
+
+| Parameter | Max-Zeichen | Wo |
+|---|---|---|
+| `headline` (Argument zu `add_content` / `kpi_grid` / `two_column` etc.) | **32** | bei 72pt auf 1 Zeile |
+| `kicker` / `kapitel` (Kapiteltitel-Argument, immer als 2. Positional) | **35** | bei 30pt auf 1 Zeile |
+| `title` von `add_title()` | **40** für 1-Zeilen-Optik (≤40 = 1 Zeile, >40 = 2 Zeilen) |
+| Agenda-Items | **~55** je Punkt, 1 Zeile |
+
+⚠️ **Wichtig für LLM-Generierung:** Plane Headlines von Anfang an **knackig und unter 32 Zeichen**. Der Code raised ValueError bei Überschreitung — du musst sonst die ganze Präsentation neu generieren.
+
 ```python
-# ❌ FALSCH — zu lang, läuft über
-add_content(prs, "viel", "KI-Trends", "KI in der Redaktion und Vermarktung 2026", ...)
-# ✅ RICHTIG — max. 35 Zeichen
-add_content(prs, "viel", "KI-Trends", "KI in Redaktion und Sales", ...)
+# ❌ FALSCH — 37 Zeichen, ValueError
+kpi_grid(prs, kpis, headline="Start ins neue Geschäftsjahr gelungen", ...)
+# ✅ RICHTIG — 22 Zeichen
+kpi_grid(prs, kpis, headline="Gelungener Jahresstart", ...)
+
+# ❌ FALSCH — 34 Zeichen
+two_column(prs, ..., headline="Turnaround Print — vier Baustellen", ...)
+# ✅ RICHTIG — 27 Zeichen
+two_column(prs, ..., headline="Print dreht — vier Baustellen", ...)
 ```
+
+**Tipp für knackige Headlines:** Aussage statt Beschreibung, Verben statt Substantive, weglassen statt erklären.
 
 **body_text-Format für `add_content()` — strikte Konvention:**
 

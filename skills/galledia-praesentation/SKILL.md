@@ -286,6 +286,39 @@ add_content(prs, "viel", "KI-Trends", "KI in der Redaktion und Vermarktung 2026"
 add_content(prs, "viel", "KI-Trends", "KI in Redaktion und Sales", ...)
 ```
 
+**body_text-Format für `add_content()` — strikte Konvention:**
+
+Der Renderer parst das body_text-String zeilenweise und unterscheidet drei Zeilen-Typen:
+
+| Zeile beginnt mit | Rendering |
+|---|---|
+| `• `, `- `, `* `, oder `· ` | **Bullet Ebene 1** — Volte 19pt Regular, schwarz, mit echtem PowerPoint-Bullet `•` |
+| `•• `, `-- `, oder `·· ` (oder Einrückung + Bullet) | **Bullet Ebene 2** — Volte 17pt Regular, grau, mit `–` und Einrückung |
+| Beliebiger Text **ohne** Bullet-Marker | **Zwischentitel** — Volte Semibold 22pt, schwarz, Abstand davor |
+| Leerzeile | kleiner Abstand |
+
+`**bold**`-Markdown wird automatisch gestrippt (Bold rendern wir via Schrift, nicht via Marker). Du brauchst Sterne also nicht — und falls sie reinrutschen, schaden sie nicht.
+
+```python
+# ✅ RICHTIG — alle drei Bullet-Marker funktionieren gleich:
+body = """Stammdaten
+• Company, Person — mit Custom-Feldern (Suchname, MwSt-Nr)
+• Verlagsobjekt — Stammdaten, Rabattstaffeln, Beraterkommission
+
+Verkauf
+• Opportunity mit Angebotsnummer (Format 2026-00001)
+• Angebotspaket — Bundle mit Listenpreis, Rabatt, Endpreis
+"""
+# «Stammdaten» und «Verkauf» werden als Zwischentitel (Semibold 22pt) gerendert,
+# die `• `-Zeilen als echte Bullets (Regular 19pt).
+```
+
+```python
+# ❌ FALSCH — `**bold**` ist unnötig (wird gestrippt), aber ASCII-Bullets fehlen:
+body = "**Stammdaten**\nCompany, Person — ohne Marker bleibt's Semibold-Zwischentitel"
+# → die zweite Zeile wird fälschlich als weiterer Zwischentitel gerendert.
+```
+
 
 ---
 

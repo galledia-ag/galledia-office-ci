@@ -3,7 +3,7 @@ helpers.py — Galledia Präsentations-Skill v1.7 (CI-Grössen 72/30pt + Längen
 Schrift-Regel: Volte (Fliesstext/Kapiteltitel), Volte Semibold (Headlines/Hervorhebungen)
 Keine Versalien. Kein Volte Rounded in generiertem Inhalt.
 """
-import os
+import os, re
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
@@ -130,9 +130,15 @@ def run(para, text, size, font, color,
     r.font.color.rgb=color; r.font.bold=bold; r.font.italic=italic
     return para
 
+_MD_BOLD = re.compile(r'\*\*(.+?)\*\*')
+
+def _strip_md(s):
+    """Entfernt **bold**-Markdown — Bold rendern wir über Schrift, nicht über Marker."""
+    return _MD_BOLD.sub(r'\1', str(s or ''))
+
 def _check_len(text, limit, was):
     """Erzwingt CI-Längenlimit. Zu lang → klarer Fehler (zwingt zu knackigem Titel)."""
-    t = (text or "").strip()
+    t = _strip_md(text).strip()
     if len(t) > limit:
         raise ValueError(
             f"{was} zu lang: {len(t)} Zeichen (max. {limit}). "
@@ -287,13 +293,20 @@ def _set_bullet(para, char, font="Arial", indent_in=0.0):
     pPr.append(pPr.makeelement(qn('a:buFont'), {'typeface': font}))
     pPr.append(pPr.makeelement(qn('a:buChar'), {'char': char}))
 
+# Bullet-Marker (alles wird akzeptiert; rendert immer als CI-Bullet •/–):
+#   Ebene 1:  "· ", "• ", "- ", "* "        (auch "•  ", "*  " mit Doppel-Space)
+#   Ebene 2:  "·· ", "•• ", "-- ", "  - ", "  * "
+_BUL_L2 = re.compile(r'^(?:··|••|--|  [-*•·])\s+')
+_BUL_L1 = re.compile(r'^[·•\-*]\s+')
+
 def _render_body(tf, body_text):
     """
     Rendert body_text mit echter Formatierung statt rohem Text-Dump:
-      «· »  am Zeilenanfang → Ebene-1-Bullet (•, schwarz, Volte 19pt)
-      «·· » am Zeilenanfang → Ebene-2-Bullet (–, grau, Volte 17pt, eingerückt)
-      Zeile ohne Bullet     → Zwischentitel (Volte Semibold 22pt, schwarz, Abstand davor)
-      Leerzeile             → kleiner Abstand
+      Bullet-Marker am Zeilenanfang  → Ebene-1-Bullet (•, schwarz, Volte 19pt Regular)
+      Doppel-Marker / Einrückung      → Ebene-2-Bullet (–, grau, Volte 17pt, eingerückt)
+      Zeile mit `**text**` oder ohne Marker → Zwischentitel (Volte Semibold 22pt, schwarz)
+      Leerzeile                       → kleiner Abstand
+    Markdown `**bold**` wird überall gestrippt — Bold rendern wir via Font, nicht Marker.
     """
     lines = [l for l in str(body_text).split("\n")]
     tf.word_wrap = True
@@ -304,21 +317,27 @@ def _render_body(tf, body_text):
             first = False
             return tf.paragraphs[0]
         return tf.add_paragraph()
-    for line in lines:
-        s = line.strip()
-        if not s:
-            p = _para(); p.space_after = Pt(4); _set_bullet(p, None)
-            continue
-        if s.startswith("·· "):
-            p = _para(); run(p, s[3:].strip(), 17, BODY, G2, space_after=5)
-            p.level = 1; _set_bullet(p, "–", indent_in=0.4)
-        elif s.startswith("· "):
-            p = _para(); run(p, s[2:].strip(), 19, BODY, BLACK, space_after=6)
-            p.level = 0; _set_bullet(p, "•")
-        else:
-            # Zwischentitel
-            p = _para(); run(p, s, 22, SB, BLACK, space_after=4)
-            p.space_before = Pt(10); _set_bullet(p, None)
+    for raw in lines:
+        s = raw.rstrip()
+        # Leerzeile
+        if not s.strip():
+            p = _para(); p.space_after = Pt(4); _set_bullet(p, None); continue
+        # Ebene-2-Bullet zuerst prüfen (Längere Marker)
+        m2 = _BUL_L2.match(s)
+        if m2:
+            text = _strip_md(s[m2.end():]).strip()
+            p = _para(); run(p, text, 17, BODY, G2, space_after=5)
+            p.level = 1; _set_bullet(p, "–", indent_in=0.4); continue
+        # Ebene-1-Bullet
+        m1 = _BUL_L1.match(s.lstrip())
+        if m1 and not s.startswith(" "):  # nicht eingerückt = L1
+            text = _strip_md(s.lstrip()[m1.end():]).strip()
+            p = _para(); run(p, text, 19, BODY, BLACK, space_after=6)
+            p.level = 0; _set_bullet(p, "•"); continue
+        # Zwischentitel: Zeile ohne Bullet-Marker (egal ob mit ** oder ohne)
+        text = _strip_md(s).strip()
+        p = _para(); run(p, text, 22, SB, BLACK, space_after=4)
+        p.space_before = Pt(10); _set_bullet(p, None)
     _enable_shrink(tf)
 
 def add_content(prs, variant, kapitel, headline, body_text, folio="", source=""):

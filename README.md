@@ -2,23 +2,43 @@
 
 Claude-Plugin für CI/CD-konforme Office-Dokumente der Galledia-Gruppe.
 
-**v1.0.0** — Hybride Architektur:
-- `galledia-praesentation` — PowerPoint (**Code Execution**, Vorlage_6 + Volte + Logos)
-- `galledia-brief` — Geschäftsbrief (.docx, MCP `galledia-office`)
-- `galledia-kurzbrief` — Kurzbrief (.docx, MCP `galledia-office`)
-- `galledia-dokument` — Dokument für Offerten/Schulungen (.docx)
+**v0.0.5** — Hybride Architektur (4 Skills, 2 Mechanismen):
+
+| Skill | Output | Mechanismus | Wo läuft die Generierung |
+|---|---|---|---|
+| `galledia-brief` | `.docx` | MCP-Server | Server (Cloudflare Access, zentrale Vorlage) |
+| `galledia-kurzbrief` | `.docx` | MCP-Server | Server (Cloudflare Access, zentrale Vorlage) |
+| `galledia-dokument` | `.docx` | Code Execution | Sandbox (`fill_dokument.py` + `Vorlage_Dokument.dotx`) |
+| `galledia-praesentation` | `.pptx` | Code Execution | Sandbox (`helpers.py` + `Vorlage_6.pptx` + Logos) |
 
 ## Verwendung
 
 ```
+/brief         Schreibe einen Brief an Kunde XY wegen…
+/kurzbrief     Kurzmitteilung an…
+/dokument      Erstelle eine Offerte / Schulungsunterlagen für…
 /praesentation Erstelle eine Präsentation zu unserem KI-Hub-Projekt
-/brief         Schreibe einen Brief an Kunde XY wegen...
-/kurzbrief     Kurzmitteilung an...
 ```
 
-Oder natürliche Sprache — der passende Skill erkennt die Anfrage automatisch.
+Oder natürliche Sprache — der passende Skill erkennt die Anfrage automatisch
+über die Trigger-Wörter in der Skill-Description.
 
-## Architektur
+## Warum zwei Mechanismen?
+
+**MCP (Brief, Kurzbrief)** — zentraler Server hostet die offizielle Vorlage.
+Vorteil: ein Update am Server gilt für alle 200 User sofort, keine
+Plugin-Re-Distribution nötig. Auth via Cloudflare Access stellt sicher, dass
+nur Galledia-Domains (`@galledia.ch` / `@fachmedien.ch`) Briefe generieren.
+
+**Code Execution (Dokument, Präsentation)** — komplexe Layouts mit vielen
+Varianten (Layouts, KPI-Grids, Pipelines, Timelines) brauchen volle Kontrolle.
+Python-Skript läuft im Sandbox, lädt Template + Assets via Raw-URL aus diesem
+Repo. Vorteil: keine Server-Abhängigkeit, voll customizable.
+
+Hard-Stop im Setup-Block: falls Assets nicht erreichbar → klarer Fehler, kein
+Improvisieren von Claude (verhindert CI-Verstösse durch fehlende Schrift/Logo).
+
+## Repo-Struktur
 
 ```
 galledia-office-ci/
@@ -26,21 +46,26 @@ galledia-office-ci/
 │   ├── plugin.json          ← Skill-Bundle-Manifest
 │   └── marketplace.json     ← Org-Marketplace-Konfiguration
 ├── .mcp.json                ← MCP brief/kurzbrief (epimetheus.uk)
-├── commands/                ← Slash-Commands /praesentation /brief etc.
+├── commands/                ← Slash-Commands /brief, /kurzbrief, /dokument, /praesentation
 ├── skills/
-│   ├── galledia-praesentation/
-│   │   ├── SKILL.md         ← Instruktionen + CI-Regeln
-│   │   ├── helpers.py       ← python-pptx Builder-Library
-│   │   ├── assets/
-│   │   │   ├── Vorlage_6.pptx      ← Galledia-Template (10 Layouts)
-│   │   │   ├── fonts/              ← Volte-Familie (5 OTF)
-│   │   │   └── logo/               ← Logos rot/weiss/schwarz (6 PNG)
-│   │   └── references/      ← Markenhandbuch, Schreibweisen, Adressen
-│   ├── galledia-brief/      ← Word-Brief (MCP-basiert)
-│   ├── galledia-kurzbrief/  ← Word-Kurzbrief (MCP-basiert)
-│   └── galledia-dokument/   ← Word-Dokument (in Entwicklung)
+│   ├── galledia-brief/      ← MCP-basiert (nur SKILL.md, kein Code)
+│   ├── galledia-kurzbrief/  ← MCP-basiert (nur SKILL.md, kein Code)
+│   ├── galledia-dokument/
+│   │   ├── SKILL.md
+│   │   ├── fill_dokument.py ← python-docx Builder
+│   │   └── assets/Vorlage_Dokument.dotx
+│   └── galledia-praesentation/
+│       ├── SKILL.md
+│       ├── helpers.py       ← python-pptx Builder
+│       └── assets/
+│           ├── Vorlage_6.pptx      ← Galledia-Template (10 Layouts)
+│           ├── fonts/              ← Volte-Familie (5 OTF)
+│           └── logo/               ← Logos rot/weiss/schwarz (6 PNG)
 └── docs/
-    └── DOCKER_CLEANUP.md    ← Roadmap MCP-Ablösung
+    ├── ROLLOUT_USER.md      ← Anleitung für End-User
+    ├── ROLLOUT_EMAIL.md     ← Ankündigungs-E-Mail-Vorlage
+    ├── DEPLOY_CHAT_SKILLS.md
+    └── archive/             ← Alte Org-Level-Skills (V1, abgelöst durch Plugin)
 ```
 
 ## Präsentation — verfügbare Layouts (Vorlage_6)
@@ -64,7 +89,15 @@ https://github.com/galledia-ag/galledia-office-ci
 Branch: main
 ```
 
+⚠️ **Bekannter Anthropic-Bug:** Das Plugin-Repo muss **temporär privat** sein
+beim ersten Hinzufügen im Org-Dropdown — public Repos erscheinen aktuell
+nicht in der Auswahl. Nach erfolgreicher Installation kann das Repo auf
+**public** umgestellt werden (nötig, damit der Sandbox Code Execution die
+Raw-URL-Assets abrufen kann).
+
 Nach jedem `git push main` → Marketplace synct automatisch (bis 30 Min).
+Bei hängender Sync: Plugin deinstallieren + neu hinzufügen erzwingt
+frischen Re-Index.
 
 ## Vorlagen aktualisieren
 
@@ -72,19 +105,21 @@ Nach jedem `git push main` → Marketplace synct automatisch (bis 30 Min).
 |---|---|---|
 | PowerPoint-Vorlage | `skills/galledia-praesentation/assets/Vorlage_6.pptx` | Designer (Prepress Flawil) |
 | Volte-Fonts | `skills/galledia-praesentation/assets/fonts/` | Brand-Guard |
-| Logos | `skills/galledia-praesentation/assets/logo/` | M:\\\_organisation\\20_logos |
-| Word-Briefvorlage | `skills/galledia-brief/` | Designer |
+| Logos | `skills/galledia-praesentation/assets/logo/` | `M:\_organisation\20_logos` |
+| Word-Dokumentvorlage | `skills/galledia-dokument/assets/Vorlage_Dokument.dotx` | Designer |
+| Word-Brief/Kurzbrief | im MCP-Server `office-ci-mcp` | Designer |
 
 ## Roadmap
 
 | Version | Inhalt | Status |
 |---|---|---|
-| v0.1–v0.3 | Brief, Kurzbrief (MCP) | ✅ |
-| v1.0.0 | Präsentation → Code Execution (Vorlage_6 + Volte + Logos) | abgelöst |
-| v1.1.x | Dokument-Skill, kombinierter Chat-Skill, Adressen, MCP-Bereinigung | abgelöst |
-| **v1.2.0** | **Adaptive Layouts (Headlines + Karten), Inhalts-Priorisierung, Qualitätsprinzipien** | **✅ aktuell** |
-| v1.3.0 | Brief + Kurzbrief auf Code Execution (MCP-Ablösung) | geplant |
-| v1.3.0 | MCP vollständig abgelöst, Docker-Cleanup | geplant |
+| 0.0.1 | Initial Plugin-Architektur | ✅ |
+| 0.0.2 | Vorlage_5 → Vorlage_6 (1-Spalter-Fix) | ✅ |
+| 0.0.3 | Forgiving body_text Parser (`**`, `•`, `-`, `*` Akzeptanz) | ✅ |
+| 0.0.4 | Headline-Length-Doku korrigiert (32 statt 35) | ✅ |
+| **0.0.5** | **Pre-Rollout Cleanup: SKILL-Hygiene, Hard-Stop, Dokument-Setup, Cmd-Konsistenz** | **✅ aktuell** |
+| 0.1.0 | Brief + Kurzbrief auf Code Execution migrieren (MCP-Ablösung) | geplant |
+| 0.2.0 | Smoke-Test-Suite, eigene Domain für MCP-Server | geplant |
 
 Detaillierter MCP-Ablöseplan: `docs/DOCKER_CLEANUP.md`
 

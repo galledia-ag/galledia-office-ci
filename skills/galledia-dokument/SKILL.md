@@ -1,6 +1,7 @@
 ---
 name: galledia-dokument
 description: "Erstelle CI-konforme Galledia-Dokumente (.docx): Angebote, Offerten, Dokumentationen, Schulungsunterlagen. Triggers: 'erstelle ein Dokument', 'Offerte schreiben', 'Angebot', 'Dokumentation', '.docx', 'Word-Dokument'. Nutzt Vorlage_Dokument.dotx mit Galledia-Header (G-Logo), Fusszeile (Titel + Seitenzahl), DokTitel/DokUntertitel/Überschriften 1–3, Bullets, Tabellen."
+version: "0.0.5"
 ---
 
 # Galledia Dokument Skill
@@ -24,8 +25,25 @@ pip install python-docx --break-system-packages
 ```
 
 ```python
-import sys, os
-sys.path.insert(0, os.path.dirname(__file__))
+# Assets von GitHub laden (Verzeichnisstruktur für fill_dokument.py erhalten)
+import os, sys, urllib.request
+_DIR = "/tmp/galledia_dokument"
+os.makedirs(f"{_DIR}/assets", exist_ok=True)
+sys.path.insert(0, _DIR)
+_BASE = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-dokument"
+for _name in ["fill_dokument.py", "assets/Vorlage_Dokument.dotx"]:
+    _dest = f"{_DIR}/{_name}"
+    if not os.path.exists(_dest):
+        try:
+            urllib.request.urlretrieve(f"{_BASE}/{_name}", _dest)
+            print(f"✓ {_name} ({os.path.getsize(_dest):,} bytes)")
+        except Exception as e:
+            raise RuntimeError(
+                f"Asset-Download fehlgeschlagen ({_name}): {e}. "
+                f"Plugin/Repo nicht erreichbar — Skill abbrechen, NICHT mit "
+                f"python-docx from scratch improvisieren."
+            )
+
 from fill_dokument import build_document
 ```
 

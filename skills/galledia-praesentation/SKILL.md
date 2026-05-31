@@ -5,7 +5,7 @@ description: >
   Verwenden wenn: ein Deck, Slides oder .pptx für Galledia / Galledia Fachmedien / ZSW
   erstellt, gefüllt oder überarbeitet werden soll. Liefert CI-Mechanik (Layouts, Farben,
   Schriften, Regeln) — nicht den Inhalt.
-version: "1.0"
+version: "0.0.5"
 template: assets/Vorlage_6.pptx
 ---
 
@@ -50,96 +50,6 @@ Lieber 8 klare Folien als 4 volle. Whitespace ist Teil des Designs.
 - Niemals ALLE Folien typografisch → Bleiwüste
 
 ---
-
-## Inhalt zuerst — die wichtigste Regel
-
-Eine Präsentation ist nur so gut wie ihr Inhalt. Reihenfolge der Inhaltsquellen:
-
-**1. Aktueller Gesprächs-/Projektkontext (höchste Priorität)**
-Wenn der Nutzer um eine **Zusammenfassung dieses Projekts / Gesprächs** bittet, ist der Inhalt bereits da — im aktuellen Gespräch und im Projekt-Wissen. Diesen TATSÄCHLICHEN Inhalt zusammenfassen:
-- Konkrete Entscheidungen, Schritte, Resultate, Versionen, Zahlen aus dem Gespräch
-- Was wurde gebaut, was wurde gelöst, was sind die nächsten Schritte
-- **Niemals auf generische Aussagen abstrahieren, wenn die Spezifika vor dir liegen.** Eine «Zusammenfassung» die den realen Inhalt durch Wikipedia-Bullets ersetzt, ist ein Totalausfall.
-
-**2. Chat-Historie durchsuchen (`conversation_search`)**
-Bei Galledia-internen Themen, die nicht im aktuellen Gespräch stehen (Jenny, ASMIQ, Digital Twin, n8n, m&k, Press-Release-Pipeline, Archiv): zuerst suchen — echte Zahlen, Architektur, Status, Namen sammeln.
-
-**3. Pflichtabfrage**
-Nur wenn Kontext und Historie nichts liefern oder das Thema extern ist.
-
-
-## Pflichtabfrage
-
-- **Dokumenttitel** (z.B. «KI-Hub Offerte»)
-- **Untertitel / Anlass** (z.B. «Angebot für XY AG»)
-- **Datum** mit Ort (z.B. «Stäfa, 29. Mai 2026»)
-- **Rechtseinheit** (z.B. «Galledia Fachmedien AG»)
-- **Adresse** (z.B. «Seestrasse 90a\n8712 Stäfa»)
-- **Struktur** — Kapitel und Inhalte (wenn unklar: erst Gliederung vorschlagen)
-
-## Setup
-
-```bash
-pip install python-docx --break-system-packages
-```
-
-```python
-import os, sys, urllib.request
-_DIR = "/tmp/galledia_dokument"
-os.makedirs(f"{_DIR}/assets", exist_ok=True)
-sys.path.insert(0, _DIR)
-_BASE = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-dokument"
-for _name, _url in [
-    ("fill_dokument.py",             "fill_dokument.py"),
-    ("assets/Vorlage_Dokument.dotx", "assets/Vorlage_Dokument.dotx"),
-]:
-    _dest = f"{_DIR}/{_name}"
-    if not os.path.exists(_dest):
-        urllib.request.urlretrieve(f"{_BASE}/{_url}", _dest)
-        print(f"✓ {_name} ({os.path.getsize(_dest):,} bytes)")
-
-from fill_dokument import build_document
-```
-
-## Verwendung
-
-```python
-build_document(
-    titel         = "KI-Hub Offerte",
-    untertitel    = "Angebot AI-Infrastruktur",
-    datum         = "Stäfa, 29. Mai 2026",
-    rechtseinheit = "Galledia Fachmedien AG",
-    adresse       = "Seestrasse 90a\n8712 Stäfa",       # \n = Zeilenumbruch
-    empfaenger    = "XY AG\nz.H. Herr Max Muster\nCH-8000 Zürich",  # optional
-    abschnitte    = [
-        {
-            "titel": "Ausgangslage",
-            "inhalt": [
-                {"typ": "text",    "inhalt": "Fliesstext..."},
-                {"typ": "bullet",  "inhalt": "Aufzählungspunkt"},
-                {"typ": "h2",      "inhalt": "Unterkapitel"},
-                {"typ": "h3",      "inhalt": "Abschnitt"},
-                {"typ": "tabelle", "inhalt": [
-                    ["Spalte A", "Spalte B"],   # Kopfzeile (schwarz, F2F2F5)
-                    ["Wert 1",   "Wert 2"],
-                ]},
-            ]
-        },
-    ],
-    output_path = "output.docx",
-)
-```
-
-## Aufbau: Deckblatt → TOC (eigene Seite) → Inhalt
-
-Ort/Datum und Rechtseinheit nur auf dem Deckblatt — nicht am Schluss wiederholen.
-TOC: in Word mit F9 aktualisieren.
-
----
-
-# 4. Präsentation
-
-CI-konforme PowerPoint (.pptx) via Code Execution (`helpers.py` + `Vorlage_6.pptx`).
 
 ## Inhalt zuerst — die wichtigste Regel
 
@@ -224,17 +134,30 @@ _DIR = "/tmp/galledia_praesentation"
 os.makedirs(f"{_DIR}/assets/logo", exist_ok=True)
 sys.path.insert(0, _DIR)
 _BASE = "https://raw.githubusercontent.com/galledia-ag/galledia-office-ci/main/skills/galledia-praesentation"
-for _name, _url in [
-    ("helpers.py",                   "helpers.py"),
-    ("assets/Vorlage_6.pptx",        "assets/Vorlage_6.pptx"),
-    ("assets/logo/logo_rot.png",     "assets/logo/logo_rot.png"),
-    ("assets/logo/logo_weiss.png",   "assets/logo/logo_weiss.png"),
-    ("assets/logo/logo_schwarz.png", "assets/logo/logo_schwarz.png"),
-]:
+_FILES = [
+    "helpers.py",
+    "assets/Vorlage_6.pptx",
+    "assets/logo/logo_rot.png",
+    "assets/logo/logo_rot_schriftzug.png",
+    "assets/logo/logo_weiss.png",
+    "assets/logo/logo_weiss_schriftzug.png",
+    "assets/logo/logo_schwarz.png",
+    "assets/logo/logo_schwarz_schriftzug.png",
+]
+for _name in _FILES:
     _dest = f"{_DIR}/{_name}"
     if not os.path.exists(_dest):
-        urllib.request.urlretrieve(f"{_BASE}/{_url}", _dest)
-        print(f"✓ {_name} ({os.path.getsize(_dest):,} bytes)")
+        try:
+            urllib.request.urlretrieve(f"{_BASE}/{_name}", _dest)
+            print(f"✓ {_name} ({os.path.getsize(_dest):,} bytes)")
+        except Exception as e:
+            # HARD-STOP: Niemals from-scratch improvisieren ohne CI-Assets.
+            raise RuntimeError(
+                f"Asset-Download fehlgeschlagen ({_name}): {e}. "
+                f"Plugin/Repo nicht erreichbar — Skill abbrechen und Asset-Fehler "
+                f"an User melden. NIEMALS mit python-pptx ohne Vorlage_6/Volte/"
+                f"Logos eine 'Galledia'-Präsentation bauen (CI-Verstoss garantiert)."
+            )
 
 from helpers import (build_presentation, add_title, add_section, add_agenda,
                      add_content, add_closing, add_discussion,

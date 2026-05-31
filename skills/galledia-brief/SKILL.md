@@ -12,6 +12,7 @@ description: >
   Arbeitssprache: Schweizer Hochdeutsch (ss statt scharf-s, also "Grüsse"
   nicht "Grüße"). Die Dokumentengenerierung erfolgt ausschliesslich ueber
   den MCP-Server galledia-office (kein lokales Python-Skript noetig).
+version: "0.0.5"
 ---
 
 # Galledia Geschaeftsbrief

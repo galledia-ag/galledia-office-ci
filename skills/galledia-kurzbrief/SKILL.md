@@ -12,6 +12,7 @@ description: >
   KEINEN Brieftext-Body, sondern 10 vordefinierte Notizoptionen mit
   Checkboxen. Die Generierung erfolgt ueber den MCP-Server galledia-office.
   Arbeitssprache: Schweizer Hochdeutsch.
+version: "0.0.5"
 ---
 
 # Galledia Kurzbrief

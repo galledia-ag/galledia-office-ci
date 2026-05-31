@@ -1,22 +1,27 @@
 ---
-description: Generiere ein laengeres Galledia-Dokument (Offerte/Anleitung/Konzept)
-allowed-tools: ["mcp__galledia-office__generate_galledia_dokument"]
+description: Galledia-Dokument im CI/CD erstellen (Vorlage_Dokument, Code Execution)
+allowed-tools: ["Code Execution"]
 ---
 
 Aktiviere den `galledia-dokument`-Skill und erstelle ein mehrseitiges
-Galledia-Dokument (Offerte, Anleitung, Konzept, Report, Manual usw.)
-im CI/CD gemaess Markenhandbuch v1.5.
+Galledia-Dokument (Offerte, Anleitung, Konzept, Report, Manual, Schulungs-
+unterlagen) im CI/CD gemaess Markenhandbuch v1.5.
 
-Im Gegensatz zum normalen Brief ist dies eine MEHRSEITIGE Vorlage mit
+Im Gegensatz zum Brief/Kurzbrief ist dies eine MEHRSEITIGE Vorlage mit
 Cover, Header/Footer und Platz fuer ausfuehrlichen Body-Inhalt.
 
-Falls der User in `$ARGUMENTS` schon Infos gibt (Titel, Empfaenger,
-Dokumenttyp), uebernimm sie. Mindestens noetig: `sender_oe` und
-`cover_title`.
+Generierung erfolgt via **Code Execution** (`fill_dokument.py` aus dem Plugin),
+nicht via MCP-Server. Setup-Block aus dem SKILL.md ausfuehren:
+1. `pip install python-docx --break-system-packages`
+2. Assets laden (`fill_dokument.py` + `Vorlage_Dokument.dotx`)
+3. `build_document(...)` mit Pflichtfeldern aufrufen
 
-Rufe `mcp__galledia-office__generate_galledia_dokument` auf, dem User
-den `download_url` als Markdown-Link praesentieren. Erwaehne, dass die
-Beispiel-Inhalte in Word noch durch eigene Inhalte ersetzt werden
-muessen.
+**Pflichtfelder** (siehe SKILL.md):
+- `titel`, `untertitel`, `datum`, `rechtseinheit`, `adresse`
+- `abschnitte` (Liste mit Kapiteln + Inhaltsblöcken)
+
+Falls der User in `$ARGUMENTS` Infos mitgegeben hat, übernimm sie.
+Fehlende Pflichtfelder vor dem Build nachfragen — nie Inhalte selbst erfinden,
+ausser der User sagt explizit «mach selbst».
 
 User-Input: $ARGUMENTS

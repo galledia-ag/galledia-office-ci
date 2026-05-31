@@ -3,7 +3,7 @@
     "galledia-office": {
       "type": "url",
       "url": "https://office-mcp.epimetheus.uk/mcp",
-      "note": "Galledia Office CI — generiert Brief (.docx), Kurzbrief (.docx) und Praesentation (.pptx) im CI/CD gemaess Markenhandbuch v1.5. Source: https://github.com/galledia-ag/office-ci-mcp. Auth: Cloudflare Access (@galledia.ch / @fachmedien.ch). Credentials nie ins Repo."
+      "note": "Galledia Office CI — generiert Brief (.docx) und Kurzbrief (.docx) im CI/CD gemaess Markenhandbuch v1.5. Dokument und Praesentation laufen via Code Execution im Plugin, nicht ueber diesen MCP. Source: https://github.com/galledia-ag/office-ci-mcp. Auth: Cloudflare Access (@galledia.ch / @fachmedien.ch). Credentials nie ins Repo."
     }
   }
 }

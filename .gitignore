@@ -1,3 +1,4 @@
+# Test artifacts (generated binaries, exploratory scripts)
 test/*.docx
 test/*.pptx
 test/*.pdf
@@ -9,8 +10,15 @@ test/inspect_*.py
 test/in_*.json
 test/input_*.json
 test/out_*.docx
+
+# Local Claude settings & permissions (per-user)
+.claude/settings.local.json
+
+# Python
 **/__pycache__/
 *.pyc
 .venv/
+
+# OS / Editor
 .DS_Store
 Thumbs.db

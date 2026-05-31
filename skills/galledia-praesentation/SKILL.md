@@ -5,7 +5,7 @@ description: >
   Verwenden wenn: ein Deck, Slides oder .pptx für Galledia / Galledia Fachmedien / ZSW
   erstellt, gefüllt oder überarbeitet werden soll. Liefert CI-Mechanik (Layouts, Farben,
   Schriften, Regeln) — nicht den Inhalt.
-version: "0.0.5"
+version: "0.0.6"
 template: assets/Vorlage_6.pptx
 ---
 
@@ -39,50 +39,95 @@ Tools: `pip install python-pptx Pillow --break-system-packages`
 
 ---
 
-## Goldene Regel: «Reduced to the max»
+## Goldene Regel: dichte Folien, klarer Rahmen
 
-Markenwerte: einfach — persönlich — wirkungsvoll. Pro Folie EINE Aussage.
-Lieber 8 klare Folien als 4 volle. Whitespace ist Teil des Designs.
+Markenwerte: einfach — persönlich — wirkungsvoll. "Einfach" heisst **eine Aussage pro Folie**, nicht **eine Zeile pro Folie**. Jede Folie muss sich beim Vorbeiscrollen wie eine vollständige, abgeschlossene Mini-Story lesen — Headline + Beweis + Detail. Eine Folie mit nur 2 Bullets wirkt unfertig und ist ein Qualitätsfehler.
+
+**Dichte-Soll (verbindlich):**
+- Inhaltsfolien (`04_vielText`, `kpi_grid`, `two_column`, `flow_pipeline`, `timeline`, `numbered_steps`): **3–5 Bullets ODER 3–4 KPIs ODER 4–6 Pipeline-Knoten** + Headline + Kapiteltitel + idealerweise Sub-Bullets / Zwischentitel im Body.
+- Aussage-Folien (`02_wenigText`): bewusst reduziert — Headline gross + 1–2 Lead-Sätze. NUR für Kernbotschaften, Zwischenfazits, emotionale Anker. Maximal **jede 4. Folie**.
+- Titel/Section/Closing: Strukturelemente, zählen nicht zur Dichte-Rechnung.
+
+**Default-Variante = `viel`.** `wenig` ist die Ausnahme, nicht die Regel.
 
 **Treatment nach Inhalt (Markenhandbuch S. 42):**
-- emotional / plakativ → Bild dominant, wenig Text → `02_wenigText`, Titelfolie, Zwischenfolie
-- informativ / sachlich → typografisch, strukturiert → `04_vielText`, Agenda
-- Niemals ALLE Folien typografisch → Bleiwüste
+- informativ / sachlich / Analyse / Status / Roadmap → `04_vielText`, `kpi_grid`, `two_column`, `flow_pipeline`, `timeline`, `numbered_steps` — **das ist der Default**
+- emotional / plakativ / Kernbotschaft → `02_wenigText`, Titelfolie, Zwischenfolie — sparsam einsetzen
+- Niemals alle Folien gleich. Mindestens 3 verschiedene Layouts pro Deck.
+
+Whitespace ist gestaltet, nicht leer. Leere Bullet-Slots sind kein Whitespace, sondern eine Lücke.
+
+---
+
+## Mindestumfang & Layout-Mix (verbindlich)
+
+**Folienzahl-Untergrenzen:**
+
+| Thema | Min. Folien | Typische Spanne |
+|---|---|---|
+| Trivial (1 Aussage, internes Statement) | 5 | 5–7 |
+| Standard-Update / Statusbericht | 12 | 12–16 |
+| Konzept / Strategie / Roadmap | 15 | 15–22 |
+| Pitch / Investor / Kunden-Präsi | 16 | 16–25 |
+
+**Pro Hauptkapitel mindestens 2 Inhaltsfolien** (nicht eine Zwischenfolie + eine Inhaltsfolie — das ist zu dünn). Wenn ein Kapitel nur eine Inhaltsfolie hergibt, ist es kein eigenes Kapitel.
+
+**Pflicht-Layout-Mix pro Deck (ab 10 Folien):**
+- mindestens **1× `kpi_grid`** (Zahlen kommen IMMER vor, auch in "weichen" Themen — Zeitpunkte, Anzahl Beteiligter, Budget, Termine)
+- mindestens **1× `two_column`** (Vergleich Heute/Ziel, Vorher/Nachher, Wir/Sie, Risiko/Chance)
+- mindestens **1× `flow_pipeline` ODER `numbered_steps` ODER `timeline`** (Prozess oder Abfolge)
+- maximal **60% der Folien dürfen `add_content` sein** — sonst Bleiwüste
+- maximal **25% der Folien dürfen `add_content(..., 'wenig', ...)` sein** — sonst Luftnummer
+
+Wenn ein Deck nur `add_content`-Folien hat: **STOP**, Layout-Mix einplanen.
 
 ---
 
 ## Inhalt zuerst — die wichtigste Regel
 
-Eine Präsentation ist nur so gut wie ihr Inhalt. Reihenfolge der Inhaltsquellen:
+Eine Präsentation ist nur so gut wie ihr Inhalt. Eine "mager wirkende" Präsentation hat fast immer eine Inhalts-Ursache, keine Layout-Ursache. Reihenfolge der Inhaltsquellen:
 
 **1. Aktueller Gesprächs-/Projektkontext (höchste Priorität)**
 Wenn der Nutzer um eine **Zusammenfassung dieses Projekts / Gesprächs** bittet, ist der Inhalt bereits da — im aktuellen Gespräch und im Projekt-Wissen. Diesen TATSÄCHLICHEN Inhalt zusammenfassen:
 - Konkrete Entscheidungen, Schritte, Resultate, Versionen, Zahlen aus dem Gespräch
 - Was wurde gebaut, was wurde gelöst, was sind die nächsten Schritte
+- Namen, Daten, Versionen, Beträge AKTIV extrahieren — nicht weglassen, weil sie "zu detailliert" wirken
 - **Niemals auf generische Aussagen abstrahieren, wenn die Spezifika vor dir liegen.** Eine «Zusammenfassung» die den realen Inhalt durch Wikipedia-Bullets ersetzt, ist ein Totalausfall.
 
-**2. Chat-Historie durchsuchen (`conversation_search`)**
-Bei Galledia-internen Themen, die nicht im aktuellen Gespräch stehen (Jenny, ASMIQ, Digital Twin, n8n, m&k, Press-Release-Pipeline, Archiv): zuerst suchen — echte Zahlen, Architektur, Status, Namen sammeln.
+**2. Chat-Historie aktiv durchsuchen (`conversation_search`)**
+Bei Galledia-internen Themen, die nicht im aktuellen Gespräch stehen (Jenny, ASMIQ, Digital Twin, n8n, m&k, Press-Release-Pipeline, Archiv): zuerst suchen — echte Zahlen, Architektur, Status, Namen sammeln. **Mehrere Suchen** mit verschiedenen Begriffen, nicht nur eine. Ziel: 10–20 echte Fakten zum Thema.
 
-**3. Pflichtabfrage**
-Nur wenn Kontext und Historie nichts liefern oder das Thema extern ist.
+**3. Projekt-Wissen / Memory durchforsten**
+`memory/`-Dateien und CLAUDE.md auf Themen-relevante Einträge prüfen.
+
+**4. Pflichtabfrage**
+Nur wenn 1–3 nichts liefern oder das Thema extern ist.
+
+**Inhalts-Tiefe-Test vor dem Bauen:**
+Kannst du für jedes geplante Kapitel mindestens 3–4 spezifische Fakten (Zahl, Name, Datum, Betrag, konkrete Entscheidung) nennen? Wenn nein → zurück zu Quelle 1–3, mehr Material sammeln. Niemals mit zu wenig Material in den Build gehen — das produziert exakt die magere Optik, die zu vermeiden ist.
 
 ## Pflichtabfrage — IMMER vor dem Bauen
 
-Bevor Code geschrieben wird, diese Fragen stellen — ausser sie sind bereits beantwortet oder aus der Historie bekannt:
+Bevor Code geschrieben wird, diese Fragen stellen — ausser sie sind bereits beantwortet oder aus Gespräch/Historie bekannt:
 
 1. **Datum + Rechtseinheit** (Fusszeile)
-2. **Kernbotschaft** — Was soll die Zielgruppe nach der Präsentation denken/tun/entscheiden?
-3. **3 wichtigste Fakten/Zahlen** — Konkrete Daten, keine Meinungen
-4. **Zielgruppe** — GL, Kunde, Team, Investor?
-5. **Storyline** — Grober Aufbau (Problem → Lösung → Nächste Schritte?)
+2. **Kernbotschaft** — Was soll die Zielgruppe nach der Präsentation denken/tun/entscheiden? (1 Satz)
+3. **Zielgruppe + Anlass** — GL-Sitzung, Kundenpräsi, Investor, internes Team? Wie viel wissen sie schon?
+4. **Storyline / Kapitelstruktur** — 3–6 Hauptkapitel, je mit Kapiteltitel
+5. **Mindestens 8–12 konkrete Fakten/Zahlen/Namen/Zeiträume/Beträge** — das Rohmaterial. Bei <10 Folien reichen 6, bei 15+ Folien sind 12–20 nötig. Beispiele: «3'900h/Monat», «Q3 2026», «Jenny Hostettler», «96 GB VRAM», «CHF 240k», «5 Verlagsobjekte». **Ohne dieses Material wird das Deck generisch.**
+6. **Erwarteter Umfang** — wenn der User keine Zahl nennt, vorschlagen nach Tabelle in Abschnitt "Mindestumfang" (Default: 15 Folien für Standard-Themen).
 
-Wenn der Nutzer sagt «mir egal», «nur ein Test», «füll selbst» → akzeptieren, plausiblen Inhalt zum Thema erfinden, aber dennoch Qualitätsprinzipien anwenden.
+**Wenn der User sagt «mir egal», «nur ein Test», «füll selbst»:** akzeptieren, ABER:
+- Chat-Historie + Projekt-Wissen aktiv durchsuchen (`conversation_search`) nach echten Galledia-Fakten zum Thema
+- Plausibel-aber-spezifisch erfinden — niemals «Vorteile», «Mehrwert», «Synergien», «Effizienzsteigerung» ohne Zahl dahinter
+- Mindest-Folienzahl und Layout-Mix trotzdem einhalten
+
+**Wenn der User explizit «kurzes Deck» / «Übersicht» / «5 Folien» sagt:** seine Vorgabe gilt, Mindestumfang-Tabelle wird übersteuert.
 
 
 ## Qualitätsprinzipien (verbindlich)
 
-Claude leitet den Nutzer zu professionellen, aussagekräftigen Folien — nicht zu formatierten Aufzählungen.
+Claude leitet den Nutzer zu professionellen, **dicht befüllten** Folien — nicht zu formatierten Aufzählungen, aber auch nicht zu Luft-Folien.
 
 **Pyramid Principle — jede Folie hat eine Hauptaussage:**
 ```
@@ -90,35 +135,63 @@ Claude leitet den Nutzer zu professionellen, aussagekräftigen Folien — nicht 
 ✅ Titel: «KI spart 3'900 Stunden pro Monat»  (Aussage mit Beweis)
 ```
 
-**Zahlen statt Adjektive:**
+**Zahlen statt Adjektive — generische Begriffe sind verboten:**
 ```
 ❌ «Signifikante Effizienzsteigerung»
+❌ «Vorteile», «Mehrwert», «Synergien», «Best Practices», «Optimierung», «Transformation» — als Standalone-Bullet
 ✅ «39% weniger manuelle Arbeit — 3'900h/Monat»
+✅ «Jenny Hostettler übernimmt Q3 2026 die ASMIQ-Pipeline»
+```
+Wenn ein Bullet ohne Zahl/Name/Datum/Betrag auskommt, gehört er meistens nicht aufs Slide. Ausnahme: Storyline-Anker und Zwischentitel.
+
+**Inhaltsdichte pro Folie (verbindlich):**
+```
+❌ Folie mit nur Headline + 2 Bullets  → wirkt leer, Qualitätsfehler
+✅ Headline + Kapiteltitel + 3–5 Bullets + ggf. Sub-Bullets / Zwischentitel
+✅ Headline + 3–4 KPI-Callouts mit Zahl + Label
+✅ Headline + 2 Spalten à 3–4 Bullets
+✅ Headline + 4–6 Pipeline-Knoten
 ```
 
-**Visuelle Beweise statt Bullet-Listen:**
+**Sub-Bullets aktiv nutzen** — verdoppeln die Informationsdichte ohne neue Folie:
 ```
-❌ 5 Bullets zu «Vorteilen von KI»  → add_content("viel")
-✅ 3 KPI-Callouts mit konkreten Zahlen  → kpi_grid()
-✅ Vorher/Nachher-Vergleich  → two_column()
-✅ Prozess in 4 Schritten  → flow_pipeline()
-```
-
-**Eine Aussage pro Folie — nie mehr als 3 Bullets:**
-```
-❌ 6 Bullets auf einer Inhaltsfolie
-✅ 3 Bullets max — oder aufteilen auf 2 Folien
+• Stammdaten ASMIQ
+•• Company, Person mit Custom-Feldern (Suchname, MwSt-Nr)
+•• 5 Verlagsobjekte mit Rabattstaffeln und Beraterkommission
+• Opportunity-Pipeline
+•• Angebotsnummern Format 2026-00001
+•• Bundle-Pakete mit Listenpreis, Rabatt, Endpreis
 ```
 
-**Roter Faden — typische Struktur:**
+**Visuelle Beweise statt Bullet-Listen — bei jeder passenden Gelegenheit:**
 ```
-Folie 1: Titel (Thema + Kernbotschaft im Untertitel)
-Folie 2: Agenda
-Folie 3: Ausgangslage / Problem (mit Zahl oder Fakt)
-Folie 4: Lösung / Kernaussage (visuell — KPI, Pipeline, Zweispalter)
-Folie 5: Beweis / Ergebnis (Zahlen, Vergleich)
-Folie 6: Nächste Schritte (nummerierte Schritte)
-Folie 7: Schlussfolie
+→ Zahlen → kpi_grid()
+→ Vergleich → two_column()
+→ Prozess → flow_pipeline() / numbered_steps()
+→ Zeitverlauf → timeline()
+→ Statement → image_bleed() oder add_content('wenig', ...)
+```
+
+**Eine Aussage pro Folie — aber mit Beweis:**
+Die Aussage steht in der Headline. Die 3–5 Bullets / KPIs / Schritte sind der BEWEIS dafür, nicht weitere Aussagen. So entstehen dichte Folien mit klarer Hierarchie statt 6 gleichrangige Bullets.
+
+**Roter Faden — typische Struktur für 15-Folien-Deck:**
+```
+Folie 1:  Titel (Thema + Kernbotschaft im Untertitel)
+Folie 2:  Agenda (4–6 Kapitel)
+Folie 3:  Zwischenfolie Kapitel 1 — Ausgangslage
+Folie 4:  Ausgangslage / Status quo (add_content viel, 4 Bullets mit Zahlen)
+Folie 5:  KPI-Grid mit 3–4 Schlüsselzahlen
+Folie 6:  Zwischenfolie Kapitel 2 — Problem
+Folie 7:  Problem-Analyse (two_column Heute/Lücke)
+Folie 8:  Wirkung des Problems (add_content viel mit Sub-Bullets)
+Folie 9:  Zwischenfolie Kapitel 3 — Lösung
+Folie 10: Lösungskonzept (flow_pipeline 4–5 Knoten)
+Folie 11: Lösungsdetail (add_content viel)
+Folie 12: Zwischenfolie Kapitel 4 — Umsetzung
+Folie 13: Roadmap (timeline mit 4–5 Phasen)
+Folie 14: Nächste Schritte (numbered_steps mit 3–4 Schritten)
+Folie 15: Schlussfolie
 ```
 
 ## Setup
@@ -367,15 +440,26 @@ Body-Text grundsätzlich in Schwarz.
 
 ---
 
-## Anti-Bleiwüste (Pflichtprüfung pro Folie)
+## Anti-Bleiwüste UND Anti-Luftnummer (Pflichtprüfung pro Folie)
 
-- Jede Folie hat ≥1 visuelles Element (Bild, Piktogramm, grosse Zahl, Diagramm, Farbfläche).
-- Max. 6 Zeilen / 3 Bullets pro Folie — sonst splitten.
-- Kennzahlen als KPI-Callout (Zahl 52–72 pt, Label klein darunter) statt im Fliesstext.
+Beide Extreme sind Fehler. Pro Folie prüfen:
+
+**Gegen Bleiwüste:**
+- Jede Folie hat ≥1 visuelles Element (Bild, Piktogramm, grosse Zahl, Diagramm, Farbfläche, Pipeline-Shapes).
+- Max. **8 Zeilen** Body-Text (inkl. Sub-Bullets) — bei mehr splitten.
+- Max. **5 Top-Level-Bullets** — sonst splitten oder in `two_column`.
 - Vergleich/Prozess/Timeline als Shapes statt als Bullet-Liste.
-- Roter Farbrhythmus einhalten (mindestens jede 3.–4. Folie ein Rot-Anker).
-- KEINE Akzentlinien unter Titeln. KEINE dekorativen Vollbalken. Vollflächige rote
-  Cover/Zwischenfolien sind dagegen CI-Signatur und ausdrücklich erwünscht.
+
+**Gegen Luftnummer:**
+- Min. **3 Bullets ODER 3 KPIs ODER 4 Pipeline-Knoten** auf Inhaltsfolien — bei weniger entweder dichter füllen oder mit Nachbarfolie zusammenlegen.
+- Min. **eine konkrete Zahl/Name/Datum** auf jeder Sach-Inhaltsfolie (Ausnahmen: Section, Closing, bewusste Aussage-Folie mit `02_wenigText`).
+- KEIN Bullet, der nur aus generischen Begriffen besteht (`Vorteile`, `Effizienz`, `Mehrwert`, `Synergien`, `Optimierung`, `Best Practices`, `Skalierung` ohne Kontext).
+- KEIN Kapitel mit nur 1 Inhaltsfolie nach der Zwischenfolie — dann ist es kein Kapitel.
+
+**Rhythmus:**
+- Roter Farbrhythmus: mindestens jede 3.–4. Folie ein Rot-Anker (Zwischenfolie oder rote Akzentfolie).
+- Layout-Rhythmus: in 10 aufeinanderfolgenden Inhaltsfolien max. 6× `add_content` — Rest aus `kpi_grid` / `two_column` / `flow_pipeline` / `timeline` / `numbered_steps` / `image_bleed`.
+- KEINE Akzentlinien unter Titeln. KEINE dekorativen Vollbalken. Vollflächige rote Cover/Zwischenfolien sind dagegen CI-Signatur und ausdrücklich erwünscht.
 
 ---
 

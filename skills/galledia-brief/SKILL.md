@@ -12,7 +12,7 @@ description: >
   Arbeitssprache: Schweizer Hochdeutsch (ss statt scharf-s, also "Grüsse"
   nicht "Grüße"). Die Dokumentengenerierung erfolgt ausschliesslich ueber
   den MCP-Server galledia-office (kein lokales Python-Skript noetig).
-version: "0.0.5"
+version: "0.0.6"
 ---
 
 # Galledia Geschaeftsbrief
@@ -25,49 +25,133 @@ Adresszeile, Schreibweisen kommen alle korrekt aus der Vorlage.
 
 ## Workflow
 
-### Schritt 1 — Daten sammeln
+### Schritt 1 — Daten sammeln (Hard-Stop bei fehlenden Pflichtfeldern)
 
-Frage den User nach **fehlenden Pflichtfeldern**. Frage NIE nach Daten, die
-der User schon in seiner Anfrage genannt hat. Ableitbare Werte
-(z.B. aktuelles Datum, Absender-Name aus Kontext) selbstaendig setzen und
-nur kurz erwaehnen.
+**Briefe muessen versandfertig generiert werden — keine Platzhalter, keine
+`<TODO>`-Markierungen, keine "wird vom User in Word ergaenzt".** Wenn ein
+Pflichtfeld fehlt ODER Claude sich unsicher ist (z.B. Vorname unbekannt,
+nur Initiale, OE nicht eindeutig): **STOP**, gezielte Rueckfrage stellen,
+KEIN MCP-Aufruf bevor alles vollstaendig ist.
 
-**Pflichtfelder:**
-- `sender_oe` — eine von: `galledia group ag` (klein!),
-  `Galledia Fachmedien AG`, `Galledia Regionalmedien AG`,
-  `Galledia Print AG`, `Galledia Digital AG`
-- `sender_street`, `sender_city` (z.B. `Buckhauserstrasse 24` / `8048 Zürich`)
-- `sender_contact_name` (Sachbearbeiter:in)
-- `recipient_lines` — Liste von Strings (Empfaenger-Adresse, je Zeile ein Eintrag)
-- `date_city` (Absendeort, z.B. `Zürich`) und `date` (z.B. `28. Mai 2026`)
-- `subject` (Betreff)
-- `body` (Brieftext)
+Frage NIE nach Daten, die der User schon genannt hat. Werte, die eindeutig
+ableitbar sind (heutiges Datum, Sender-Stadt aus OE-Adresse): selbstaendig
+setzen und kurz erwaehnen.
 
-**Optionale Felder:**
-- `sender_contact_phone` — Format `T +41 58 344 96 22`
-- `sender_contact_mobile` — Format `M +41 78 846 24 16`
-- `sender_contact_email`
-- `introduction` — Default `Sehr geehrte Damen und Herren`
+#### Pflichtfelder — ABSENDER (Galledia-Mitarbeiter)
+
+| Feld | Beispiel | Pflicht |
+|---|---|---|
+| `sender_oe` (Aktiengesellschaft) | `Galledia Fachmedien AG` | ✅ |
+| `sender_first_name` | `Stefan` | ✅ |
+| `sender_last_name` | `Zimmermann` | ✅ |
+| `sender_street` | `Buckhauserstrasse 24` | ✅ |
+| `sender_zip` + `sender_city` | `8048 Zürich` | ✅ |
+| `sender_contact_email` | `stefan.zimmermann@galledia.ch` | ✅ |
+| `sender_contact_phone` ODER `sender_contact_mobile` (mind. eines) | `T +41 58 344 96 22` / `M +41 79 555 12 34` | ✅ (eines davon) |
+
+OE muss exakt eine der 5 sein: `galledia group ag` (klein!), `Galledia Fachmedien AG`,
+`Galledia Regionalmedien AG`, `Galledia Print AG`, `Galledia Digital AG`.
+
+Legacy-Feld: `sender_contact_name` wird automatisch aus `sender_first_name` + `sender_last_name`
+zusammengesetzt — du musst es nicht separat angeben.
+
+#### Pflichtfelder — EMPFAENGER
+
+| Feld | Beispiel | Pflicht |
+|---|---|---|
+| `recipient_salutation` | `Herr` / `Frau` (ggf. mit Titel: `Frau Dr.`) | ✅ |
+| `recipient_first_name` | `Hans` | ✅ |
+| `recipient_last_name` | `Mueller` | ✅ |
+| `recipient_company` (falls Firma) | `Mueller AG` | ⬜ optional, aber meist da |
+| `recipient_street` | `Bahnhofstrasse 1` | ✅ |
+| `recipient_zip` + `recipient_city` | `8001 Zuerich` | ✅ |
+
+Diese Felder werden im MCP-Payload zu `recipient_lines` (Liste, je Zeile ein Eintrag) zusammengefuegt.
+
+#### Pflichtfelder — ALLGEMEIN
+
+| Feld | Beispiel | Pflicht |
+|---|---|---|
+| `date_city` | `Zuerich` | ✅ |
+| `date` | `28. Mai 2026` | ✅ |
+| `subject` | `Offerte fuer Inserat Q3 2026` | ✅ |
+| `body` | Brieftext (siehe Body-Format unten) | ✅ |
+
+#### Anrede — HART (nie generisch wenn Name bekannt)
+
+| Empfaenger | Anrede (`introduction`) |
+|---|---|
+| `recipient_salutation = Herr`, Name bekannt | `Sehr geehrter Herr {Nachname}` |
+| `recipient_salutation = Frau`, Name bekannt | `Sehr geehrte Frau {Nachname}` |
+| Mit Titel | `Sehr geehrter Herr Dr. {Nachname}` |
+| Nur Firmenadresse, kein Personenname | `Sehr geehrte Damen und Herren` |
+
+**Niemals** `Sehr geehrte Damen und Herren` wenn der Empfaenger-Name bekannt ist —
+das ist ein Briefkultur-Fehler und wirkt unprofessionell.
+
+#### Optionale Felder
+
 - `closing` — Default `Freundliche Grüsse`
-- `signatory_name`, `signatory_role` (mehrere Rollen via `\n` trennen
-  oder als Array)
-- `enclosures`, `copy_to`
+- `signatory_name`, `signatory_role` (mehrere Rollen via `\n` oder Array)
+- `enclosures` — Liste der Beilagen (z.B. `["Offerte_Q3_2026.pdf", "AGB.pdf"]`)
+- `copy_to` — CC-Empfaenger
+- `recipient_company` — wenn Empfaenger einer Firma zugeordnet ist
 
-**Body-Format:**
+#### Body-Format
+
 - Doppelte Newlines `\n\n` = Absatzwechsel
 - Einfache Newlines `\n` = Zeilenumbruch im selben Absatz
 - Zeilen mit `· ` am Anfang werden zu Word-Aufzaehlungspunkten
 
+#### Rueckfrage-Beispiele
+
+Wenn ein Feld fehlt, **gezielt fragen**, nicht generisch:
+
+✅ "Wie heisst der Empfaenger genau? Ich brauche Anrede (Herr/Frau), Vor- und Nachname."
+✅ "Welche Telefon- oder Mobilnummer soll ich im Absenderblock auffuehren?"
+✅ "Welche Rechtseinheit soll als Absender stehen — Fachmedien AG, Regionalmedien AG, Print AG, Digital AG oder galledia group ag?"
+
+❌ "Bitte gib mir noch alle fehlenden Infos." (zu vage)
+❌ "Soll ich einen Default verwenden?" (Defaults sind verboten bei Personendaten)
+
 ### Schritt 2 — CI-Validierung im Kopf
 
 Pruefe vor dem Aufruf:
-- Schreibweise der OE exakt eine der 5 erlaubten
-- Telefonformat `T +41 …` / `M +41 …`
+- OE exakt eine der 5 erlaubten Schreibweisen
+- Telefonformat **zwingend** `T +41 58 344 96 22` bzw. `M +41 79 555 12 34` (mit Leerzeichen, ohne Bindestrich)
+- E-Mail plausibel (Format `vorname.nachname@galledia.ch` oder `@fachmedien.ch`)
+- Anrede konsistent mit `recipient_salutation` (Herr/Frau ↔ "Sehr geehrter Herr" / "Sehr geehrte Frau")
 - Keine geraden Anfuehrungszeichen — Galledia verlangt `« »` (Guillemets)
-- Keine verbotenen Begriffe: "Galledia AG", "Galledia Gruppe",
-  "Galledia GmbH", "Fax" (letzteres verwendet Galledia nicht mehr)
+- Keine verbotenen Begriffe: "Galledia AG", "Galledia Gruppe", "Galledia GmbH", "Fax"
 
-Bei Verstoss: User darauf hinweisen, KEIN Brief generieren.
+Bei Verstoss: User darauf hinweisen, **KEIN Brief generieren**.
+
+### Schritt 2a — Versandfertig-Checkliste (Pflicht vor MCP-Call)
+
+Bevor du `mcp__galledia-office__generate_galledia_brief` aufrufst, fasse den
+Brief in einem kompakten Block zusammen und hole vom User eine Bestaetigung:
+
+```
+Bereit zum Generieren — bitte kurz pruefen:
+
+ABSENDER:    Stefan Zimmermann, Galledia Fachmedien AG
+             Buckhauserstrasse 24, 8048 Zuerich
+             stefan.zimmermann@galledia.ch, T +41 58 344 96 22
+
+EMPFAENGER:  Herr Hans Mueller
+             Mueller AG, Bahnhofstrasse 1, 8001 Zuerich
+
+DATUM:       Zuerich, 28. Mai 2026
+BETREFF:     Offerte fuer Inserat Q3 2026
+ANREDE:      Sehr geehrter Herr Mueller
+GRUSS:       Freundliche Gruesse / Stefan Zimmermann
+BEILAGEN:    Offerte_Q3_2026.pdf
+
+Alles korrekt? Dann generiere ich den Brief.
+```
+
+Bei "ja" / Bestaetigung → MCP-Call. Bei Korrekturen → anpassen und erneut zeigen.
+Bei Unsicherheit (User antwortet vage) → nicht generieren, nachfragen.
 
 ### Schritt 3 — MCP-Tool aufrufen
 

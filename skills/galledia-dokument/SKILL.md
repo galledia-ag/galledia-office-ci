@@ -1,7 +1,7 @@
 ---
 name: galledia-dokument
 description: "Erstelle CI-konforme Galledia-Dokumente (.docx): Angebote, Offerten, Dokumentationen, Schulungsunterlagen. Triggers: 'erstelle ein Dokument', 'Offerte schreiben', 'Angebot', 'Dokumentation', '.docx', 'Word-Dokument'. Nutzt Vorlage_Dokument.dotx mit Galledia-Header (G-Logo), Fusszeile (Titel + Seitenzahl), DokTitel/DokUntertitel/Überschriften 1–3, Bullets, Tabellen."
-version: "0.0.5"
+version: "0.0.6"
 ---
 
 # Galledia Dokument Skill
